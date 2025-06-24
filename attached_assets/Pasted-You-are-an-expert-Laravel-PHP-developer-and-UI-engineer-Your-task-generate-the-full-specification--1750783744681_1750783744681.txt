@@ -1,0 +1,86 @@
+You are an expert Laravel/PHP developer and UI engineer. Your task: generate the full specification, folder structure, and starter code snippets for a lean Super-Admin panel (“BookMyFarm Admin”) that connects to our existing MySQL schema and mobile-app business logic. Focus on core monitoring and CRUD operations; avoid heavy analytics or payment workflows. Use white (#FFFFFF) backgrounds with accents and primary buttons in green (#17AE7D). Keep database migrations unchanged.
+
+1. **Project Setup**  
+   - Laravel 10, PHP 8.2  
+   - Authentication via existing `admins` table (id, name, email, password) :contentReference[oaicite:0]{index=0}  
+   - Blade + Tailwind CSS, simple layouts  
+
+2. **Layout & Navigation**  
+   - Top bar: logo “BookMyFarm Admin” (green) + admin name + logout  
+   - Sidebar menu (expand/collapse icons):  
+     - Dashboard  
+     - Users (regular & owners)  
+     - Farms  
+     - Bookings  
+     - Transactions  
+     - Requested Farms  
+     - Amenities  
+     - Categories  
+     - Cities & Areas  
+     - Reviews  
+     - FAQs  
+
+3. **Dashboard (route: `/admin/dashboard`)**  
+   - Total users, total owners, total farms, total bookings (counts)  
+   - Pending booking requests, pending farm approvals, recent sign-ups  
+   - Latest 5 bookings with status badges  
+   - Latest 5 requested farms awaiting approval :contentReference[oaicite:1]{index=1}  
+
+4. **Users Module**  
+   - Table: `users` (id, name, email, phone_number, is_owner, is_active) :contentReference[oaicite:2]{index=2}  
+   - List view: sortable columns, search by name/email, filter by owner vs customer, toggle active status  
+   - Edit view: change name, email, phone, is_active, is_owner  
+   - Bulk actions: deactivate, promote to owner  
+
+5. **Farms Module**  
+   - Table: `farms` (id, user_id, category_id, city_id, area_id, name, is_enable, is_booking) :contentReference[oaicite:3]{index=3}  
+   - List view: show name, owner, category, city, status, booking enabled toggle  
+   - Detail/Edit view: full farm fields (including price & policies), image management via `farm_images`  
+   - Quick action: Approve/Disable farm  
+
+6. **Bookings Module**  
+   - Table: `bookings` (id, user_id, farm_id, check_in_date/time, check_out_date/time, status) :contentReference[oaicite:4]{index=4}  
+   - List view: filter by status (Upcoming, Complete, Cancelled), date range picker  
+   - Detail view: customer info, farm info, confirmation_code, status change controls  
+
+7. **Transactions Module**  
+   - Table: `transactions` (id, user_id, farm_id, order_id, amount, status) :contentReference[oaicite:5]{index=5}  
+   - List view: filter by status (Pending, Complete, Fail), search by order_id  
+   - Detail view: payment_method, transaction_details, timestamps  
+
+8. **Requested Farms Module**  
+   - Table: `requested_farms` (id, user_id, owner_name, farm_name, city, area, status) :contentReference[oaicite:6]{index=6}  
+   - List view: filter by status (pending, approved, cancelled), review details  
+   - Approve/Cancel actions: maps fields into `farms` or send rejection email  
+
+9. **Amenities, Categories, Cities & Areas**  
+   - Basic CRUD for `amenities`, `categories`, `cities`, `areas` tables :contentReference[oaicite:7]{index=7}  
+   - In cities list, show count of areas, allow nested management  
+
+10. **Reviews & FAQs**  
+    - Reviews: list of `reviews` (farm, user, star, text), ability to delete or hide inappropriate content  
+    - FAQs: global FAQs (`faqs`), farm-specific FAQs (`farm_faqs`), simple add/edit/delete  
+
+11. **Technical & Dev Notes**  
+    - Use Eloquent models with scopes (e.g. `scopeActive()`, `scopePending()`)  
+    - Repository pattern optional but controllers may call `AdminService` for complex logic  
+    - All list pages use DataTables (server-side pagination)  
+    - Blade components for tables, badges, modals, form inputs  
+    - API endpoints prefixed `/api/admin/*` for future React/Vue migration  
+    - Seeders for initial categories, amenities, cities  
+
+12. **Styling & Theming**  
+    - Tailwind config: extend primary color to `green-500: #17AE7D`  
+    - Buttons: `.btn-primary { @apply bg-green-500 text-white hover:bg-green-600 }`  
+    - Cards: white background with soft shadow, rounded corners (rounded-2xl)  
+
+13. **Security & Roles**  
+    - Single “super-admin” role—no multi-tenant roles needed now  
+    - Middleware `auth:admin`, CSRF for all forms  
+
+**Deliverables:**  
+- `routes/web.php` entries, sample `AdminController.php`, Blade layouts & components  
+- Database seeders skeleton  
+- Tailwind config excerpt  
+- README with setup & deployment steps  
+- OpenAPI spec for admin APIs (optional)  

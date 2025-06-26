@@ -15,6 +15,10 @@ import Categories from "./pages/Categories";
 import Amenities from "./pages/Amenities";
 import Cities from "./pages/Cities";
 import FAQs from "./pages/FAQs";
+import SubProperties from "./pages/SubProperties";
+import Banners from "./pages/Banners";
+import FeaturedSections from "./pages/FeaturedSections";
+import Reels from "./pages/Reels";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,6 +37,10 @@ function Router() {
         <Route path="/amenities" component={Amenities} />
         <Route path="/cities" component={Cities} />
         <Route path="/faqs" component={FAQs} />
+        <Route path="/sub-properties" component={SubProperties} />
+        <Route path="/banners" component={Banners} />
+        <Route path="/featured-sections" component={FeaturedSections} />
+        <Route path="/reels" component={Reels} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

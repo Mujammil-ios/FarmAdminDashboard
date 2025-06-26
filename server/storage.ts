@@ -23,6 +23,16 @@ import {
   type InsertReview,
   type FAQ,
   type InsertFAQ,
+  type SubProperty,
+  type InsertSubProperty,
+  type Banner,
+  type InsertBanner,
+  type FeaturedSection,
+  type InsertFeaturedSection,
+  type FeaturedSectionFarm,
+  type InsertFeaturedSectionFarm,
+  type Reel,
+  type InsertReel,
   type FarmWithDetails,
   type BookingWithDetails,
   type TransactionWithDetails,
@@ -121,6 +131,44 @@ export interface IStorage {
   createFAQ(faq: InsertFAQ): Promise<FAQ>;
   updateFAQ(id: number, faq: Partial<InsertFAQ>): Promise<FAQ>;
   deleteFAQ(id: number): Promise<void>;
+
+  // Sub-Properties
+  getAllSubProperties(farmId?: number): Promise<SubProperty[]>;
+  getSubProperty(id: number): Promise<SubProperty | undefined>;
+  createSubProperty(subProperty: InsertSubProperty): Promise<SubProperty>;
+  updateSubProperty(id: number, subProperty: Partial<InsertSubProperty>): Promise<SubProperty>;
+  deleteSubProperty(id: number): Promise<void>;
+  toggleSubPropertyStatus(id: number): Promise<SubProperty>;
+
+  // Banners
+  getAllBanners(): Promise<Banner[]>;
+  getBanner(id: number): Promise<Banner | undefined>;
+  createBanner(banner: InsertBanner): Promise<Banner>;
+  updateBanner(id: number, banner: Partial<InsertBanner>): Promise<Banner>;
+  deleteBanner(id: number): Promise<void>;
+  toggleBannerStatus(id: number): Promise<Banner>;
+  reorderBanner(id: number, direction: "up" | "down"): Promise<Banner>;
+
+  // Featured Sections
+  getAllFeaturedSections(): Promise<FeaturedSection[]>;
+  getFeaturedSection(id: number): Promise<FeaturedSection | undefined>;
+  createFeaturedSection(section: InsertFeaturedSection): Promise<FeaturedSection>;
+  updateFeaturedSection(id: number, section: Partial<InsertFeaturedSection>): Promise<FeaturedSection>;
+  deleteFeaturedSection(id: number): Promise<void>;
+  
+  // Featured Section Farms
+  getFeaturedSectionFarms(sectionId: number): Promise<FeaturedSectionFarm[]>;
+  addFarmsToSection(sectionId: number, farmIds: number[]): Promise<void>;
+  removeFarmFromSection(sectionId: number, farmId: number): Promise<void>;
+
+  // Reels
+  getAllReels(): Promise<Reel[]>;
+  getReel(id: number): Promise<Reel | undefined>;
+  createReel(reel: InsertReel): Promise<Reel>;
+  updateReel(id: number, reel: Partial<InsertReel>): Promise<Reel>;
+  deleteReel(id: number): Promise<void>;
+  toggleReelStatus(id: number): Promise<Reel>;
+  reorderReel(id: number, direction: "up" | "down"): Promise<Reel>;
 }
 
 // Import MemoryStorage implementation

@@ -209,6 +209,129 @@ export const farmFaqs = pgTable("farm_faqs", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Sub-Properties (for resorts, villas, apartments within a farm)
+export const subProperties = pgTable("sub_properties", {
+  id: serial("id").primaryKey(),
+  farmId: integer("farm_id").references(() => farms.id),
+  name: varchar("name", { length: 255 }),
+  description: text("description"),
+  type: varchar("type", { length: 100 }), // villa, apartment, resort, etc.
+  maxGuests: integer("max_guests"),
+  pricePerSlot: decimal("price_per_slot", { precision: 10, scale: 2 }),
+  amenities: jsonb("amenities"), // Array of amenity IDs
+  images: jsonb("images"), // Array of image URLs
+  checkInTime: time("check_in_time"),
+  checkOutTime: time("check_out_time"),
+  morningCheckIn: time("morning_check_in"),
+  morningCheckOut: time("morning_check_out"),
+  eveningCheckIn: time("evening_check_in"),
+  eveningCheckOut: time("evening_check_out"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Sub-property availability management
+export const subPropertySlots = pgTable("sub_property_slots", {
+  id: serial("id").primaryKey(),
+  subPropertyId: integer("sub_property_id").references(() => subProperties.id),
+  date: date("date"),
+  slotType: varchar("slot_type", { length: 50 }), // morning, evening
+  isBlocked: boolean("is_blocked").default(false),
+  isBooked: boolean("is_booked").default(false),
+  blockReason: text("block_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Home Section Banners
+export const banners = pgTable("banners", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }),
+  subtitle: text("subtitle"),
+  imageUrl: text("image_url"),
+  linkUrl: text("link_url"),
+  linkType: varchar("link_type", { length: 50 }), // farm, category, external
+  targetId: integer("target_id"), // farm or category ID
+  displayOrder: integer("display_order"),
+  isActive: boolean("is_active").default(true),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Custom Featured Sections
+export const featuredSections = pgTable("featured_sections", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }),
+  displayName: varchar("display_name", { length: 255 }),
+  description: text("description"),
+  type: varchar("type", { length: 50 }), // affordable, couples, visited, luxury
+  iconUrl: text("icon_url"),
+  displayOrder: integer("display_order"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Farms in Featured Sections
+export const featuredSectionFarms = pgTable("featured_section_farms", {
+  id: serial("id").primaryKey(),
+  sectionId: integer("section_id").references(() => featuredSections.id),
+  farmId: integer("farm_id").references(() => farms.id),
+  displayOrder: integer("display_order"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Reels Management
+export const reels = pgTable("reels", {
+  id: serial("id").primaryKey(),
+  farmId: integer("farm_id").references(() => farms.id),
+  title: varchar("title", { length: 255 }),
+  description: text("description"),
+  videoUrl: text("video_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  farmAliasName: varchar("farm_alias_name", { length: 255 }),
+  duration: integer("duration"), // in seconds
+  viewCount: integer("view_count").default(0),
+  shareCount: integer("share_count").default(0),
+  tags: jsonb("tags"), // Array of tags
+  displayOrder: integer("display_order"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Content Management for Home Feed
+export const homeContent = pgTable("home_content", {
+  id: serial("id").primaryKey(),
+  type: varchar("type", { length: 50 }), // banner, featured_section, promotion
+  contentId: integer("content_id"), // Reference to banner, section, etc.
+  title: varchar("title", { length: 255 }),
+  displayOrder: integer("display_order"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Slot Timing Configuration
+export const slotConfigurations = pgTable("slot_configurations", {
+  id: serial("id").primaryKey(),
+  farmId: integer("farm_id").references(() => farms.id),
+  subPropertyId: integer("sub_property_id").references(() => subProperties.id),
+  dayOfWeek: integer("day_of_week"), // 0=Sunday, 1=Monday, etc.
+  morningStartTime: time("morning_start_time"),
+  morningEndTime: time("morning_end_time"),
+  eveningStartTime: time("evening_start_time"),
+  eveningEndTime: time("evening_end_time"),
+  cleaningDuration: integer("cleaning_duration"), // minutes
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const citiesRelations = relations(cities, ({ many }) => ({
   areas: many(areas),
@@ -242,6 +365,37 @@ export const farmsRelations = relations(farms, ({ one, many }) => ({
   transactions: many(transactions),
   reviews: many(reviews),
   farmFaqs: many(farmFaqs),
+  subProperties: many(subProperties),
+  reels: many(reels),
+  slotConfigurations: many(slotConfigurations),
+}));
+
+export const subPropertiesRelations = relations(subProperties, ({ one, many }) => ({
+  farm: one(farms, { fields: [subProperties.farmId], references: [farms.id] }),
+  slots: many(subPropertySlots),
+  slotConfigurations: many(slotConfigurations),
+}));
+
+export const subPropertySlotsRelations = relations(subPropertySlots, ({ one }) => ({
+  subProperty: one(subProperties, { fields: [subPropertySlots.subPropertyId], references: [subProperties.id] }),
+}));
+
+export const featuredSectionsRelations = relations(featuredSections, ({ many }) => ({
+  farms: many(featuredSectionFarms),
+}));
+
+export const featuredSectionFarmsRelations = relations(featuredSectionFarms, ({ one }) => ({
+  section: one(featuredSections, { fields: [featuredSectionFarms.sectionId], references: [featuredSections.id] }),
+  farm: one(farms, { fields: [featuredSectionFarms.farmId], references: [farms.id] }),
+}));
+
+export const reelsRelations = relations(reels, ({ one }) => ({
+  farm: one(farms, { fields: [reels.farmId], references: [farms.id] }),
+}));
+
+export const slotConfigurationsRelations = relations(slotConfigurations, ({ one }) => ({
+  farm: one(farms, { fields: [slotConfigurations.farmId], references: [farms.id] }),
+  subProperty: one(subProperties, { fields: [slotConfigurations.subPropertyId], references: [subProperties.id] }),
 }));
 
 export const bookingsRelations = relations(bookings, ({ one }) => ({
@@ -267,6 +421,14 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({ i
 export const insertRequestedFarmSchema = createInsertSchema(requestedFarms).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertFaqSchema = createInsertSchema(faqs).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertSubPropertySchema = createInsertSchema(subProperties).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertSubPropertySlotSchema = createInsertSchema(subPropertySlots).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertBannerSchema = createInsertSchema(banners).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertFeaturedSectionSchema = createInsertSchema(featuredSections).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertFeaturedSectionFarmSchema = createInsertSchema(featuredSectionFarms).omit({ id: true, createdAt: true });
+export const insertReelSchema = createInsertSchema(reels).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertHomeContentSchema = createInsertSchema(homeContent).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertSlotConfigurationSchema = createInsertSchema(slotConfigurations).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Types
 export type Admin = typeof admins.$inferSelect;
@@ -293,6 +455,30 @@ export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type FAQ = typeof faqs.$inferSelect;
 export type InsertFAQ = z.infer<typeof insertFaqSchema>;
+
+export type SubProperty = typeof subProperties.$inferSelect;
+export type InsertSubProperty = z.infer<typeof insertSubPropertySchema>;
+
+export type SubPropertySlot = typeof subPropertySlots.$inferSelect;
+export type InsertSubPropertySlot = z.infer<typeof insertSubPropertySlotSchema>;
+
+export type Banner = typeof banners.$inferSelect;
+export type InsertBanner = z.infer<typeof insertBannerSchema>;
+
+export type FeaturedSection = typeof featuredSections.$inferSelect;
+export type InsertFeaturedSection = z.infer<typeof insertFeaturedSectionSchema>;
+
+export type FeaturedSectionFarm = typeof featuredSectionFarms.$inferSelect;
+export type InsertFeaturedSectionFarm = z.infer<typeof insertFeaturedSectionFarmSchema>;
+
+export type Reel = typeof reels.$inferSelect;
+export type InsertReel = z.infer<typeof insertReelSchema>;
+
+export type HomeContent = typeof homeContent.$inferSelect;
+export type InsertHomeContent = z.infer<typeof insertHomeContentSchema>;
+
+export type SlotConfiguration = typeof slotConfigurations.$inferSelect;
+export type InsertSlotConfiguration = z.infer<typeof insertSlotConfigurationSchema>;
 
 // Extended types with relations
 export type FarmWithDetails = Farm & {

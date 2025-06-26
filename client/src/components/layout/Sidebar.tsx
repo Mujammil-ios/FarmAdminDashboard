@@ -15,6 +15,10 @@ import {
   HelpCircle,
   Waves,
   X,
+  Building,
+  Image,
+  Video,
+  Sparkles,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -30,6 +34,13 @@ const navigation = [
   { name: "Transactions", href: "/transactions", icon: CreditCard },
   { name: "Requested Farms", href: "/requested-farms", icon: HandHeart },
   { name: "Reviews", href: "/reviews", icon: Star },
+];
+
+const businessNavigation = [
+  { name: "Sub-Properties", href: "/sub-properties", icon: Building },
+  { name: "Banners", href: "/banners", icon: Image },
+  { name: "Featured Sections", href: "/featured-sections", icon: Sparkles },
+  { name: "Reels", href: "/reels", icon: Video },
 ];
 
 const settingsNavigation = [
@@ -112,6 +123,39 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </Link>
               );
             })}
+
+            {/* Business Features Section */}
+            <div className="pt-6">
+              <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Business Features
+              </h3>
+              <div className="mt-2 space-y-1">
+                {businessNavigation.map((item) => {
+                  const isActive = isActiveRoute(item.href);
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={cn(
+                        "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+                        isActive
+                          ? "bg-primary text-white"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      )}
+                      onClick={() => onClose()}
+                    >
+                      <item.icon
+                        className={cn(
+                          "mr-3 flex-shrink-0 h-5 w-5",
+                          isActive ? "text-white" : "text-gray-400 group-hover:text-gray-500"
+                        )}
+                      />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
 
             {/* Settings Section */}
             <div className="pt-6">

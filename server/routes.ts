@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertAdminSchema, insertUserSchema, insertFarmSchema, insertBookingSchema, insertTransactionSchema, insertRequestedFarmSchema, insertCategorySchema, insertAmenitySchema, insertCitySchema, insertAreaSchema, insertFaqSchema } from "@shared/schema";
+import { insertAdminSchema, insertUserSchema, insertFarmSchema, insertBookingSchema, insertTransactionSchema, insertRequestedFarmSchema, insertCategorySchema, insertAmenitySchema, insertCitySchema, insertAreaSchema, insertFaqSchema, insertSubPropertySchema, insertBannerSchema, insertFeaturedSectionSchema, insertReelSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard metrics
@@ -518,6 +518,315 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting FAQ:", error);
       res.status(400).json({ message: "Failed to delete FAQ" });
+    }
+  });
+
+  // Sub-Properties routes
+  app.get("/api/sub-properties", async (req, res) => {
+    try {
+      const { farmId } = req.query;
+      const subProperties = await storage.getAllSubProperties(farmId ? parseInt(farmId as string) : undefined);
+      res.json(subProperties);
+    } catch (error) {
+      console.error("Error fetching sub-properties:", error);
+      res.status(500).json({ message: "Failed to fetch sub-properties" });
+    }
+  });
+
+  app.get("/api/sub-properties/:id", async (req, res) => {
+    try {
+      const subProperty = await storage.getSubProperty(parseInt(req.params.id));
+      if (!subProperty) {
+        return res.status(404).json({ message: "Sub-property not found" });
+      }
+      res.json(subProperty);
+    } catch (error) {
+      console.error("Error fetching sub-property:", error);
+      res.status(500).json({ message: "Failed to fetch sub-property" });
+    }
+  });
+
+  app.post("/api/sub-properties", async (req, res) => {
+    try {
+      const subPropertyData = insertSubPropertySchema.parse(req.body);
+      const subProperty = await storage.createSubProperty(subPropertyData);
+      res.status(201).json(subProperty);
+    } catch (error) {
+      console.error("Error creating sub-property:", error);
+      res.status(400).json({ message: "Failed to create sub-property" });
+    }
+  });
+
+  app.put("/api/sub-properties/:id", async (req, res) => {
+    try {
+      const subPropertyData = insertSubPropertySchema.partial().parse(req.body);
+      const subProperty = await storage.updateSubProperty(parseInt(req.params.id), subPropertyData);
+      res.json(subProperty);
+    } catch (error) {
+      console.error("Error updating sub-property:", error);
+      res.status(400).json({ message: "Failed to update sub-property" });
+    }
+  });
+
+  app.delete("/api/sub-properties/:id", async (req, res) => {
+    try {
+      await storage.deleteSubProperty(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting sub-property:", error);
+      res.status(400).json({ message: "Failed to delete sub-property" });
+    }
+  });
+
+  app.post("/api/sub-properties/:id/toggle-status", async (req, res) => {
+    try {
+      const subProperty = await storage.toggleSubPropertyStatus(parseInt(req.params.id));
+      res.json(subProperty);
+    } catch (error) {
+      console.error("Error toggling sub-property status:", error);
+      res.status(400).json({ message: "Failed to toggle sub-property status" });
+    }
+  });
+
+  // Banners routes
+  app.get("/api/banners", async (req, res) => {
+    try {
+      const banners = await storage.getAllBanners();
+      res.json(banners);
+    } catch (error) {
+      console.error("Error fetching banners:", error);
+      res.status(500).json({ message: "Failed to fetch banners" });
+    }
+  });
+
+  app.get("/api/banners/:id", async (req, res) => {
+    try {
+      const banner = await storage.getBanner(parseInt(req.params.id));
+      if (!banner) {
+        return res.status(404).json({ message: "Banner not found" });
+      }
+      res.json(banner);
+    } catch (error) {
+      console.error("Error fetching banner:", error);
+      res.status(500).json({ message: "Failed to fetch banner" });
+    }
+  });
+
+  app.post("/api/banners", async (req, res) => {
+    try {
+      const bannerData = insertBannerSchema.parse(req.body);
+      const banner = await storage.createBanner(bannerData);
+      res.status(201).json(banner);
+    } catch (error) {
+      console.error("Error creating banner:", error);
+      res.status(400).json({ message: "Failed to create banner" });
+    }
+  });
+
+  app.put("/api/banners/:id", async (req, res) => {
+    try {
+      const bannerData = insertBannerSchema.partial().parse(req.body);
+      const banner = await storage.updateBanner(parseInt(req.params.id), bannerData);
+      res.json(banner);
+    } catch (error) {
+      console.error("Error updating banner:", error);
+      res.status(400).json({ message: "Failed to update banner" });
+    }
+  });
+
+  app.delete("/api/banners/:id", async (req, res) => {
+    try {
+      await storage.deleteBanner(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting banner:", error);
+      res.status(400).json({ message: "Failed to delete banner" });
+    }
+  });
+
+  app.post("/api/banners/:id/toggle-status", async (req, res) => {
+    try {
+      const banner = await storage.toggleBannerStatus(parseInt(req.params.id));
+      res.json(banner);
+    } catch (error) {
+      console.error("Error toggling banner status:", error);
+      res.status(400).json({ message: "Failed to toggle banner status" });
+    }
+  });
+
+  app.post("/api/banners/:id/reorder", async (req, res) => {
+    try {
+      const { direction } = req.body;
+      const banner = await storage.reorderBanner(parseInt(req.params.id), direction);
+      res.json(banner);
+    } catch (error) {
+      console.error("Error reordering banner:", error);
+      res.status(400).json({ message: "Failed to reorder banner" });
+    }
+  });
+
+  // Featured Sections routes
+  app.get("/api/featured-sections", async (req, res) => {
+    try {
+      const featuredSections = await storage.getAllFeaturedSections();
+      res.json(featuredSections);
+    } catch (error) {
+      console.error("Error fetching featured sections:", error);
+      res.status(500).json({ message: "Failed to fetch featured sections" });
+    }
+  });
+
+  app.get("/api/featured-sections/:id", async (req, res) => {
+    try {
+      const featuredSection = await storage.getFeaturedSection(parseInt(req.params.id));
+      if (!featuredSection) {
+        return res.status(404).json({ message: "Featured section not found" });
+      }
+      res.json(featuredSection);
+    } catch (error) {
+      console.error("Error fetching featured section:", error);
+      res.status(500).json({ message: "Failed to fetch featured section" });
+    }
+  });
+
+  app.post("/api/featured-sections", async (req, res) => {
+    try {
+      const sectionData = insertFeaturedSectionSchema.parse(req.body);
+      const featuredSection = await storage.createFeaturedSection(sectionData);
+      res.status(201).json(featuredSection);
+    } catch (error) {
+      console.error("Error creating featured section:", error);
+      res.status(400).json({ message: "Failed to create featured section" });
+    }
+  });
+
+  app.put("/api/featured-sections/:id", async (req, res) => {
+    try {
+      const sectionData = insertFeaturedSectionSchema.partial().parse(req.body);
+      const featuredSection = await storage.updateFeaturedSection(parseInt(req.params.id), sectionData);
+      res.json(featuredSection);
+    } catch (error) {
+      console.error("Error updating featured section:", error);
+      res.status(400).json({ message: "Failed to update featured section" });
+    }
+  });
+
+  app.delete("/api/featured-sections/:id", async (req, res) => {
+    try {
+      await storage.deleteFeaturedSection(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting featured section:", error);
+      res.status(400).json({ message: "Failed to delete featured section" });
+    }
+  });
+
+  // Featured Section Farms routes
+  app.get("/api/featured-sections/:id/farms", async (req, res) => {
+    try {
+      const sectionFarms = await storage.getFeaturedSectionFarms(parseInt(req.params.id));
+      res.json(sectionFarms);
+    } catch (error) {
+      console.error("Error fetching featured section farms:", error);
+      res.status(500).json({ message: "Failed to fetch featured section farms" });
+    }
+  });
+
+  app.post("/api/featured-sections/:id/farms", async (req, res) => {
+    try {
+      const { farmIds } = req.body;
+      await storage.addFarmsToSection(parseInt(req.params.id), farmIds);
+      res.status(201).json({ message: "Farms added to section successfully" });
+    } catch (error) {
+      console.error("Error adding farms to section:", error);
+      res.status(400).json({ message: "Failed to add farms to section" });
+    }
+  });
+
+  app.delete("/api/featured-sections/:sectionId/farms/:farmId", async (req, res) => {
+    try {
+      await storage.removeFarmFromSection(parseInt(req.params.sectionId), parseInt(req.params.farmId));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error removing farm from section:", error);
+      res.status(400).json({ message: "Failed to remove farm from section" });
+    }
+  });
+
+  // Reels routes
+  app.get("/api/reels", async (req, res) => {
+    try {
+      const reels = await storage.getAllReels();
+      res.json(reels);
+    } catch (error) {
+      console.error("Error fetching reels:", error);
+      res.status(500).json({ message: "Failed to fetch reels" });
+    }
+  });
+
+  app.get("/api/reels/:id", async (req, res) => {
+    try {
+      const reel = await storage.getReel(parseInt(req.params.id));
+      if (!reel) {
+        return res.status(404).json({ message: "Reel not found" });
+      }
+      res.json(reel);
+    } catch (error) {
+      console.error("Error fetching reel:", error);
+      res.status(500).json({ message: "Failed to fetch reel" });
+    }
+  });
+
+  app.post("/api/reels", async (req, res) => {
+    try {
+      const reelData = insertReelSchema.parse(req.body);
+      const reel = await storage.createReel(reelData);
+      res.status(201).json(reel);
+    } catch (error) {
+      console.error("Error creating reel:", error);
+      res.status(400).json({ message: "Failed to create reel" });
+    }
+  });
+
+  app.put("/api/reels/:id", async (req, res) => {
+    try {
+      const reelData = insertReelSchema.partial().parse(req.body);
+      const reel = await storage.updateReel(parseInt(req.params.id), reelData);
+      res.json(reel);
+    } catch (error) {
+      console.error("Error updating reel:", error);
+      res.status(400).json({ message: "Failed to update reel" });
+    }
+  });
+
+  app.delete("/api/reels/:id", async (req, res) => {
+    try {
+      await storage.deleteReel(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting reel:", error);
+      res.status(400).json({ message: "Failed to delete reel" });
+    }
+  });
+
+  app.post("/api/reels/:id/toggle-status", async (req, res) => {
+    try {
+      const reel = await storage.toggleReelStatus(parseInt(req.params.id));
+      res.json(reel);
+    } catch (error) {
+      console.error("Error toggling reel status:", error);
+      res.status(400).json({ message: "Failed to toggle reel status" });
+    }
+  });
+
+  app.post("/api/reels/:id/reorder", async (req, res) => {
+    try {
+      const { direction } = req.body;
+      const reel = await storage.reorderReel(parseInt(req.params.id), direction);
+      res.json(reel);
+    } catch (error) {
+      console.error("Error reordering reel:", error);
+      res.status(400).json({ message: "Failed to reorder reel" });
     }
   });
 

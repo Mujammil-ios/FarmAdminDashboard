@@ -23,6 +23,16 @@ import {
   type InsertReview,
   type FAQ,
   type InsertFAQ,
+  type SubProperty,
+  type InsertSubProperty,
+  type Banner,
+  type InsertBanner,
+  type FeaturedSection,
+  type InsertFeaturedSection,
+  type FeaturedSectionFarm,
+  type InsertFeaturedSectionFarm,
+  type Reel,
+  type InsertReel,
   type FarmWithDetails,
   type BookingWithDetails,
   type TransactionWithDetails,
@@ -42,6 +52,11 @@ export class MemoryStorage implements IStorage {
   private requestedFarms: RequestedFarm[] = [];
   private reviews: Review[] = [];
   private faqs: FAQ[] = [];
+  private subProperties: SubProperty[] = [];
+  private banners: Banner[] = [];
+  private featuredSections: FeaturedSection[] = [];
+  private featuredSectionFarms: FeaturedSectionFarm[] = [];
+  private reels: Reel[] = [];
 
   private nextId = 1;
 
@@ -995,5 +1010,299 @@ export class MemoryStorage implements IStorage {
       throw new Error('FAQ not found');
     }
     this.faqs.splice(faqIndex, 1);
+  }
+
+  // Sub-Properties methods
+  async getAllSubProperties(farmId?: number): Promise<SubProperty[]> {
+    if (farmId) {
+      return this.subProperties.filter(sp => sp.farmId === farmId);
+    }
+    return this.subProperties;
+  }
+
+  async getSubProperty(id: number): Promise<SubProperty | undefined> {
+    return this.subProperties.find(sp => sp.id === id);
+  }
+
+  async createSubProperty(subProperty: InsertSubProperty): Promise<SubProperty> {
+    const newSubProperty: SubProperty = {
+      ...subProperty,
+      id: this.nextId++,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.subProperties.push(newSubProperty);
+    return newSubProperty;
+  }
+
+  async updateSubProperty(id: number, subPropertyData: Partial<InsertSubProperty>): Promise<SubProperty> {
+    const spIndex = this.subProperties.findIndex(sp => sp.id === id);
+    if (spIndex === -1) {
+      throw new Error('Sub-property not found');
+    }
+    
+    this.subProperties[spIndex] = {
+      ...this.subProperties[spIndex],
+      ...subPropertyData,
+      updatedAt: new Date()
+    };
+    
+    return this.subProperties[spIndex];
+  }
+
+  async deleteSubProperty(id: number): Promise<void> {
+    const spIndex = this.subProperties.findIndex(sp => sp.id === id);
+    if (spIndex === -1) {
+      throw new Error('Sub-property not found');
+    }
+    this.subProperties.splice(spIndex, 1);
+  }
+
+  async toggleSubPropertyStatus(id: number): Promise<SubProperty> {
+    const sp = this.subProperties.find(sp => sp.id === id);
+    if (!sp) {
+      throw new Error('Sub-property not found');
+    }
+    
+    sp.isActive = !sp.isActive;
+    sp.updatedAt = new Date();
+    
+    return sp;
+  }
+
+  // Banners methods
+  async getAllBanners(): Promise<Banner[]> {
+    return this.banners.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }
+
+  async getBanner(id: number): Promise<Banner | undefined> {
+    return this.banners.find(banner => banner.id === id);
+  }
+
+  async createBanner(banner: InsertBanner): Promise<Banner> {
+    const newBanner: Banner = {
+      ...banner,
+      id: this.nextId++,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.banners.push(newBanner);
+    return newBanner;
+  }
+
+  async updateBanner(id: number, bannerData: Partial<InsertBanner>): Promise<Banner> {
+    const bannerIndex = this.banners.findIndex(banner => banner.id === id);
+    if (bannerIndex === -1) {
+      throw new Error('Banner not found');
+    }
+    
+    this.banners[bannerIndex] = {
+      ...this.banners[bannerIndex],
+      ...bannerData,
+      updatedAt: new Date()
+    };
+    
+    return this.banners[bannerIndex];
+  }
+
+  async deleteBanner(id: number): Promise<void> {
+    const bannerIndex = this.banners.findIndex(banner => banner.id === id);
+    if (bannerIndex === -1) {
+      throw new Error('Banner not found');
+    }
+    this.banners.splice(bannerIndex, 1);
+  }
+
+  async toggleBannerStatus(id: number): Promise<Banner> {
+    const banner = this.banners.find(banner => banner.id === id);
+    if (!banner) {
+      throw new Error('Banner not found');
+    }
+    
+    banner.isActive = !banner.isActive;
+    banner.updatedAt = new Date();
+    
+    return banner;
+  }
+
+  async reorderBanner(id: number, direction: "up" | "down"): Promise<Banner> {
+    const banner = this.banners.find(b => b.id === id);
+    if (!banner) {
+      throw new Error('Banner not found');
+    }
+
+    const sortedBanners = this.banners.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    const currentIndex = sortedBanners.findIndex(b => b.id === id);
+    
+    if (direction === "up" && currentIndex > 0) {
+      const temp = sortedBanners[currentIndex - 1].displayOrder;
+      sortedBanners[currentIndex - 1].displayOrder = banner.displayOrder;
+      banner.displayOrder = temp;
+    } else if (direction === "down" && currentIndex < sortedBanners.length - 1) {
+      const temp = sortedBanners[currentIndex + 1].displayOrder;
+      sortedBanners[currentIndex + 1].displayOrder = banner.displayOrder;
+      banner.displayOrder = temp;
+    }
+
+    banner.updatedAt = new Date();
+    return banner;
+  }
+
+  // Featured Sections methods
+  async getAllFeaturedSections(): Promise<FeaturedSection[]> {
+    return this.featuredSections;
+  }
+
+  async getFeaturedSection(id: number): Promise<FeaturedSection | undefined> {
+    return this.featuredSections.find(section => section.id === id);
+  }
+
+  async createFeaturedSection(section: InsertFeaturedSection): Promise<FeaturedSection> {
+    const newSection: FeaturedSection = {
+      ...section,
+      id: this.nextId++,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.featuredSections.push(newSection);
+    return newSection;
+  }
+
+  async updateFeaturedSection(id: number, sectionData: Partial<InsertFeaturedSection>): Promise<FeaturedSection> {
+    const sectionIndex = this.featuredSections.findIndex(section => section.id === id);
+    if (sectionIndex === -1) {
+      throw new Error('Featured section not found');
+    }
+    
+    this.featuredSections[sectionIndex] = {
+      ...this.featuredSections[sectionIndex],
+      ...sectionData,
+      updatedAt: new Date()
+    };
+    
+    return this.featuredSections[sectionIndex];
+  }
+
+  async deleteFeaturedSection(id: number): Promise<void> {
+    const sectionIndex = this.featuredSections.findIndex(section => section.id === id);
+    if (sectionIndex === -1) {
+      throw new Error('Featured section not found');
+    }
+    this.featuredSections.splice(sectionIndex, 1);
+    
+    // Remove associated farm relationships
+    this.featuredSectionFarms = this.featuredSectionFarms.filter(fsf => fsf.sectionId !== id);
+  }
+
+  // Featured Section Farms methods
+  async getFeaturedSectionFarms(sectionId: number): Promise<FeaturedSectionFarm[]> {
+    return this.featuredSectionFarms.filter(fsf => fsf.sectionId === sectionId);
+  }
+
+  async addFarmsToSection(sectionId: number, farmIds: number[]): Promise<void> {
+    for (const farmId of farmIds) {
+      const existing = this.featuredSectionFarms.find(fsf => 
+        fsf.sectionId === sectionId && fsf.farmId === farmId
+      );
+      
+      if (!existing) {
+        const newFeaturedSectionFarm: FeaturedSectionFarm = {
+          id: this.nextId++,
+          sectionId,
+          farmId,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        this.featuredSectionFarms.push(newFeaturedSectionFarm);
+      }
+    }
+  }
+
+  async removeFarmFromSection(sectionId: number, farmId: number): Promise<void> {
+    const index = this.featuredSectionFarms.findIndex(fsf => 
+      fsf.sectionId === sectionId && fsf.farmId === farmId
+    );
+    
+    if (index !== -1) {
+      this.featuredSectionFarms.splice(index, 1);
+    }
+  }
+
+  // Reels methods
+  async getAllReels(): Promise<Reel[]> {
+    return this.reels.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }
+
+  async getReel(id: number): Promise<Reel | undefined> {
+    return this.reels.find(reel => reel.id === id);
+  }
+
+  async createReel(reel: InsertReel): Promise<Reel> {
+    const newReel: Reel = {
+      ...reel,
+      id: this.nextId++,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.reels.push(newReel);
+    return newReel;
+  }
+
+  async updateReel(id: number, reelData: Partial<InsertReel>): Promise<Reel> {
+    const reelIndex = this.reels.findIndex(reel => reel.id === id);
+    if (reelIndex === -1) {
+      throw new Error('Reel not found');
+    }
+    
+    this.reels[reelIndex] = {
+      ...this.reels[reelIndex],
+      ...reelData,
+      updatedAt: new Date()
+    };
+    
+    return this.reels[reelIndex];
+  }
+
+  async deleteReel(id: number): Promise<void> {
+    const reelIndex = this.reels.findIndex(reel => reel.id === id);
+    if (reelIndex === -1) {
+      throw new Error('Reel not found');
+    }
+    this.reels.splice(reelIndex, 1);
+  }
+
+  async toggleReelStatus(id: number): Promise<Reel> {
+    const reel = this.reels.find(reel => reel.id === id);
+    if (!reel) {
+      throw new Error('Reel not found');
+    }
+    
+    reel.isActive = !reel.isActive;
+    reel.updatedAt = new Date();
+    
+    return reel;
+  }
+
+  async reorderReel(id: number, direction: "up" | "down"): Promise<Reel> {
+    const reel = this.reels.find(r => r.id === id);
+    if (!reel) {
+      throw new Error('Reel not found');
+    }
+
+    const sortedReels = this.reels.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    const currentIndex = sortedReels.findIndex(r => r.id === id);
+    
+    if (direction === "up" && currentIndex > 0) {
+      const temp = sortedReels[currentIndex - 1].displayOrder;
+      sortedReels[currentIndex - 1].displayOrder = reel.displayOrder;
+      reel.displayOrder = temp;
+    } else if (direction === "down" && currentIndex < sortedReels.length - 1) {
+      const temp = sortedReels[currentIndex + 1].displayOrder;
+      sortedReels[currentIndex + 1].displayOrder = reel.displayOrder;
+      reel.displayOrder = temp;
+    }
+
+    reel.updatedAt = new Date();
+    return reel;
   }
 }

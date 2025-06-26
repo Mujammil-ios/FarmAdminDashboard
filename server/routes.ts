@@ -830,6 +830,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Availability checker route
+  app.post("/api/check-availability", async (req, res) => {
+    try {
+      const { checkInDate, checkOutDate } = req.body;
+      
+      if (!checkInDate || !checkOutDate) {
+        return res.status(400).json({ message: "Check-in and check-out dates are required" });
+      }
+      
+      const availableOptions = await storage.checkAvailability(checkInDate, checkOutDate);
+      res.json(availableOptions);
+    } catch (error) {
+      console.error("Error checking availability:", error);
+      res.status(500).json({ message: "Failed to check availability" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -19,6 +19,7 @@ import {
   Image,
   Video,
   Sparkles,
+  Search,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -34,6 +35,7 @@ const navigation = [
   { name: "Transactions", href: "/transactions", icon: CreditCard },
   { name: "Requested Farms", href: "/requested-farms", icon: HandHeart },
   { name: "Reviews", href: "/reviews", icon: Star },
+  { name: "Availability Checker", href: "/availability-checker", icon: Search },
 ];
 
 const businessNavigation = [

@@ -430,6 +430,313 @@ export class MemoryStorage implements IStorage {
       }
     ];
 
+    // Initialize Sub-Properties with comprehensive data
+    this.subProperties = [
+      {
+        id: 1,
+        farmId: 1,
+        name: "Luxury Villa A",
+        description: "Premium villa with mountain view, private pool, and modern amenities. Perfect for couples and small families.",
+        type: "villa",
+        capacity: 4,
+        pricePerSlot: 5500,
+        amenities: [1, 2, 4, 5, 7, 8],
+        images: ["https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=500", "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=500"],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 2,
+        farmId: 1,
+        name: "Cozy Cottage B",
+        description: "Rustic cottage surrounded by organic gardens. Experience farm life with modern comfort and traditional charm.",
+        type: "cottage",
+        capacity: 6,
+        pricePerSlot: 3800,
+        amenities: [1, 2, 5, 6, 7],
+        images: ["https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500", "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=500"],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 3,
+        farmId: 2,
+        name: "Resort Apartment 1",
+        description: "Modern apartment in the heart of dairy farm. Wake up to fresh milk and cheese every morning.",
+        type: "apartment",
+        capacity: 3,
+        pricePerSlot: 4200,
+        amenities: [1, 2, 3, 5, 7],
+        images: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500"],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 4,
+        farmId: 2,
+        name: "Family Suite 2",
+        description: "Spacious family suite with kitchenette and living area. Perfect for extended farm stays.",
+        type: "suite",
+        capacity: 8,
+        pricePerSlot: 6000,
+        amenities: [1, 2, 4, 5, 6, 7, 8],
+        images: ["https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=500"],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 5,
+        farmId: 3,
+        name: "Heritage Bungalow",
+        description: "Traditional bungalow with ethnic decor and authentic rural experience. Connect with nature and tradition.",
+        type: "bungalow",
+        capacity: 5,
+        pricePerSlot: 4800,
+        amenities: [1, 2, 5, 6, 7],
+        images: ["https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500"],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 6,
+        farmId: 4,
+        name: "Urban Loft",
+        description: "Modern loft apartment in urban farm setting. Experience city farming with style and comfort.",
+        type: "loft",
+        capacity: 2,
+        pricePerSlot: 4500,
+        amenities: [1, 2, 4, 5, 7],
+        images: ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500"],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 7,
+        farmId: 5,
+        name: "Poultry Farm Cabin",
+        description: "Charming cabin overlooking free-range poultry areas. Perfect for nature lovers and bird watchers.",
+        type: "cabin",
+        capacity: 4,
+        pricePerSlot: 3200,
+        amenities: [1, 2, 5, 6, 7],
+        images: ["https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500"],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    // Initialize Banners with comprehensive data
+    this.banners = [
+      {
+        id: 1,
+        title: "Welcome to Farm Paradise",
+        description: "Discover authentic farm experiences across India. Book your perfect getaway today!",
+        imageUrl: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
+        actionText: "Explore Farms",
+        actionUrl: "/farms",
+        displayOrder: 1,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 2,
+        title: "50% Off Weekend Bookings",
+        description: "Special weekend offer on all farm stays. Limited time offer - book now!",
+        imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
+        actionText: "Book Now",
+        actionUrl: "/booking",
+        displayOrder: 2,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 3,
+        title: "Organic Food Festival",
+        description: "Join our monthly organic food festival. Fresh produce, cooking workshops, and family fun!",
+        imageUrl: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800",
+        actionText: "Learn More",
+        actionUrl: "/events",
+        displayOrder: 3,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 4,
+        title: "Corporate Team Building",
+        description: "Perfect venue for corporate retreats and team building activities in natural settings.",
+        imageUrl: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800",
+        actionText: "Contact Us",
+        actionUrl: "/corporate",
+        displayOrder: 4,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 5,
+        title: "Family Adventures Await",
+        description: "Create unforgettable memories with your family. Educational tours, animal interactions, and more!",
+        imageUrl: "https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?w=800",
+        actionText: "Plan Visit",
+        actionUrl: "/family",
+        displayOrder: 5,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    // Initialize Featured Sections with comprehensive data
+    this.featuredSections = [
+      {
+        id: 1,
+        name: "Most Affordable",
+        description: "Budget-friendly farm experiences without compromising on quality and fun.",
+        icon: "💰",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 2,
+        name: "Perfect for Couples",
+        description: "Romantic farm getaways designed for couples seeking peaceful and intimate experiences.",
+        icon: "💕",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 3,
+        name: "Most Visited",
+        description: "Popular farms loved by thousands of visitors. Top-rated experiences you can't miss.",
+        icon: "⭐",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 4,
+        name: "Luxury Experience",
+        description: "Premium farm stays with world-class amenities and personalized service.",
+        icon: "👑",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    // Initialize Featured Section Farms relationships
+    this.featuredSectionFarms = [
+      { id: 1, sectionId: 1, farmId: 5, createdAt: new Date(), updatedAt: new Date() }, // Most Affordable
+      { id: 2, sectionId: 1, farmId: 3, createdAt: new Date(), updatedAt: new Date() },
+      { id: 3, sectionId: 2, farmId: 1, createdAt: new Date(), updatedAt: new Date() }, // Perfect for Couples
+      { id: 4, sectionId: 2, farmId: 2, createdAt: new Date(), updatedAt: new Date() },
+      { id: 5, sectionId: 3, farmId: 1, createdAt: new Date(), updatedAt: new Date() }, // Most Visited
+      { id: 6, sectionId: 3, farmId: 4, createdAt: new Date(), updatedAt: new Date() },
+      { id: 7, sectionId: 3, farmId: 2, createdAt: new Date(), updatedAt: new Date() },
+      { id: 8, sectionId: 4, farmId: 1, createdAt: new Date(), updatedAt: new Date() }, // Luxury Experience
+      { id: 9, sectionId: 4, farmId: 4, createdAt: new Date(), updatedAt: new Date() }
+    ];
+
+    // Initialize Reels with comprehensive data
+    this.reels = [
+      {
+        id: 1,
+        farmId: 1,
+        title: "Morning at Green Valley",
+        description: "Experience the serenity of early morning farm activities. Fresh air, bird songs, and organic breakfast!",
+        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+        thumbnailUrl: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400",
+        duration: 45,
+        farmAlias: "Green Paradise",
+        displayOrder: 1,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 2,
+        farmId: 2,
+        title: "Fresh Milk Collection",
+        description: "Watch our daily milk collection process. From cow to table - the purest dairy experience.",
+        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
+        thumbnailUrl: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400",
+        duration: 60,
+        farmAlias: "Dairy Delight",
+        displayOrder: 2,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 3,
+        farmId: 3,
+        title: "Village Life Experience",
+        description: "Immerse yourself in authentic village culture. Traditional cooking, folk music, and rural crafts.",
+        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+        thumbnailUrl: "https://images.unsplash.com/photo-1628191081676-73e4a2b2ae73?w=400",
+        duration: 90,
+        farmAlias: "Heritage Village",
+        displayOrder: 3,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 4,
+        farmId: 4,
+        title: "Urban Farming Innovation",
+        description: "Discover the future of farming in the city. Hydroponic systems and sustainable urban agriculture.",
+        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
+        thumbnailUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400",
+        duration: 75,
+        farmAlias: "City Farm Hub",
+        displayOrder: 4,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 5,
+        farmId: 5,
+        title: "Farm to Table Dining",
+        description: "Experience fresh ingredients transformed into delicious meals. From garden to plate in minutes.",
+        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+        thumbnailUrl: "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=400",
+        duration: 50,
+        farmAlias: "Farm Kitchen",
+        displayOrder: 5,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 6,
+        farmId: 1,
+        title: "Kids Farm Adventure",
+        description: "Children's favorite activities - animal feeding, treasure hunts, and nature exploration.",
+        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
+        thumbnailUrl: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400",
+        duration: 65,
+        farmAlias: "Adventure Farm",
+        displayOrder: 6,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
     this.nextId = 1000;
   }
 
@@ -1304,5 +1611,132 @@ export class MemoryStorage implements IStorage {
 
     reel.updatedAt = new Date();
     return reel;
+  }
+
+  // Availability checker method
+  async checkAvailability(checkInDate: string, checkOutDate: string): Promise<any[]> {
+    const availableOptions: any[] = [];
+    
+    // Get all active farms
+    const activeFarms = this.farms.filter(farm => farm.isEnable);
+    
+    // Get all active sub-properties
+    const activeSubProperties = this.subProperties.filter(sp => sp.isActive);
+    
+    // Get existing bookings for the date range
+    const existingBookings = this.bookings.filter(booking => {
+      const bookingCheckIn = booking.checkInDate;
+      const bookingCheckOut = booking.checkOutDate;
+      
+      // Check if dates overlap
+      return !(checkOutDate <= bookingCheckIn || checkInDate >= bookingCheckOut);
+    });
+    
+    // Check farm availability
+    for (const farm of activeFarms) {
+      const farmBookings = existingBookings.filter(b => b.farmId === farm.id);
+      
+      // Check morning slot (6 AM - 6 PM)
+      const morningBooked = farmBookings.some(b => 
+        b.slotType === 'morning' || b.slotType === 'full_day'
+      );
+      
+      // Check evening slot (6 PM - 6 AM)
+      const eveningBooked = farmBookings.some(b => 
+        b.slotType === 'evening' || b.slotType === 'full_day'
+      );
+      
+      if (!morningBooked) {
+        availableOptions.push({
+          type: 'farm',
+          id: farm.id,
+          name: farm.name,
+          description: farm.description,
+          slotType: 'morning',
+          slotTime: '6:00 AM - 6:00 PM',
+          pricePerSlot: farm.pricePerSlot,
+          city: this.cities.find(c => c.id === farm.cityId)?.name,
+          area: this.areas.find(a => a.id === farm.areaId)?.name,
+          images: farm.images,
+          amenities: farm.amenities?.map(id => this.amenities.find(a => a.id === id)?.name).filter(Boolean)
+        });
+      }
+      
+      if (!eveningBooked) {
+        availableOptions.push({
+          type: 'farm',
+          id: farm.id,
+          name: farm.name,
+          description: farm.description,
+          slotType: 'evening',
+          slotTime: '6:00 PM - 6:00 AM',
+          pricePerSlot: farm.pricePerSlot,
+          city: this.cities.find(c => c.id === farm.cityId)?.name,
+          area: this.areas.find(a => a.id === farm.areaId)?.name,
+          images: farm.images,
+          amenities: farm.amenities?.map(id => this.amenities.find(a => a.id === id)?.name).filter(Boolean)
+        });
+      }
+    }
+    
+    // Check sub-property availability
+    for (const subProperty of activeSubProperties) {
+      const subPropertyBookings = existingBookings.filter(b => b.subPropertyId === subProperty.id);
+      
+      // Check morning slot
+      const morningBooked = subPropertyBookings.some(b => 
+        b.slotType === 'morning' || b.slotType === 'full_day'
+      );
+      
+      // Check evening slot
+      const eveningBooked = subPropertyBookings.some(b => 
+        b.slotType === 'evening' || b.slotType === 'full_day'
+      );
+      
+      const parentFarm = this.farms.find(f => f.id === subProperty.farmId);
+      
+      if (!morningBooked) {
+        availableOptions.push({
+          type: 'sub-property',
+          id: subProperty.id,
+          farmId: subProperty.farmId,
+          farmName: parentFarm?.name,
+          name: subProperty.name,
+          description: subProperty.description,
+          propertyType: subProperty.type,
+          capacity: subProperty.capacity,
+          slotType: 'morning',
+          slotTime: '6:00 AM - 6:00 PM',
+          pricePerSlot: subProperty.pricePerSlot,
+          city: this.cities.find(c => c.id === parentFarm?.cityId)?.name,
+          area: this.areas.find(a => a.id === parentFarm?.areaId)?.name,
+          images: subProperty.images,
+          amenities: subProperty.amenities?.map(id => this.amenities.find(a => a.id === id)?.name).filter(Boolean)
+        });
+      }
+      
+      if (!eveningBooked) {
+        availableOptions.push({
+          type: 'sub-property',
+          id: subProperty.id,
+          farmId: subProperty.farmId,
+          farmName: parentFarm?.name,
+          name: subProperty.name,
+          description: subProperty.description,
+          propertyType: subProperty.type,
+          capacity: subProperty.capacity,
+          slotType: 'evening',
+          slotTime: '6:00 PM - 6:00 AM',
+          pricePerSlot: subProperty.pricePerSlot,
+          city: this.cities.find(c => c.id === parentFarm?.cityId)?.name,
+          area: this.areas.find(a => a.id === parentFarm?.areaId)?.name,
+          images: subProperty.images,
+          amenities: subProperty.amenities?.map(id => this.amenities.find(a => a.id === id)?.name).filter(Boolean)
+        });
+      }
+    }
+    
+    // Sort by price (cheapest first)
+    return availableOptions.sort((a, b) => a.pricePerSlot - b.pricePerSlot);
   }
 }

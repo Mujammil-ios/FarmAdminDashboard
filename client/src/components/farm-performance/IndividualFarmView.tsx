@@ -43,55 +43,32 @@ export default function IndividualFarmView({ farmId, onBack }: IndividualFarmVie
 
   // Fetch individual farm performance
   const { data: farmPerformance } = useQuery<IndividualFarmPerformance>({
-    queryKey: [
-      "/api/farm-performance/farm",
-      farmId,
-      selectedMonth.getFullYear(),
-      selectedMonth.getMonth() + 1,
-    ],
+    queryKey: [`/api/farm-performance/farm/${farmId}/${selectedMonth.getFullYear()}/${selectedMonth.getMonth() + 1}`],
   });
 
   // Fetch farm calendar data
   const { data: calendarData } = useQuery<CalendarDayStatus[]>({
-    queryKey: [
-      "/api/farm-performance/farm",
-      farmId,
-      "calendar",
-      selectedMonth.getFullYear(),
-      selectedMonth.getMonth() + 1,
-    ],
+    queryKey: [`/api/farm-performance/farm/${farmId}/calendar/${selectedMonth.getFullYear()}/${selectedMonth.getMonth() + 1}`],
   });
 
   // Fetch booking history
   const { data: bookingHistory } = useQuery<BookingHistory[]>({
-    queryKey: [
-      "/api/farm-performance/farm",
-      farmId,
-      "bookings",
-      selectedMonth.getFullYear(),
-      selectedMonth.getMonth() + 1,
-    ],
+    queryKey: [`/api/farm-performance/farm/${farmId}/bookings/${selectedMonth.getFullYear()}/${selectedMonth.getMonth() + 1}`],
   });
 
   // Fetch transaction history
   const { data: transactionHistory } = useQuery<TransactionHistory[]>({
-    queryKey: [
-      "/api/farm-performance/farm",
-      farmId,
-      "transactions",
-      selectedMonth.getFullYear(),
-      selectedMonth.getMonth() + 1,
-    ],
+    queryKey: [`/api/farm-performance/farm/${farmId}/transactions/${selectedMonth.getFullYear()}/${selectedMonth.getMonth() + 1}`],
   });
 
   // Fetch reviews
   const { data: reviews } = useQuery<FarmReview[]>({
-    queryKey: ["/api/farm-performance/farm", farmId, "reviews"],
+    queryKey: [`/api/farm-performance/farm/${farmId}/reviews`],
   });
 
   // Fetch payouts
   const { data: payouts } = useQuery<OwnerPayout[]>({
-    queryKey: ["/api/farm-performance/farm", farmId, "payouts"],
+    queryKey: [`/api/farm-performance/farm/${farmId}/payouts`],
   });
 
   const formatCurrency = (amount: number) => {

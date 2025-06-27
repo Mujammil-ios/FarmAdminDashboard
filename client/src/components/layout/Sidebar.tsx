@@ -59,6 +59,7 @@ const navigationGroups: NavigationGroup[] = [
     name: "User Management",
     icon: UserCog,
     items: [
+      { name: "Advanced User Management", href: "/user-management", icon: UserCog },
       { name: "Users", href: "/users", icon: Users },
       { name: "Reviews", href: "/reviews", icon: Star },
     ],

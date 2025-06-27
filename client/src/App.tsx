@@ -20,6 +20,7 @@ import Banners from "./pages/Banners";
 import FeaturedSections from "./pages/FeaturedSections";
 import Reels from "./pages/Reels";
 import AvailabilityChecker from "./pages/AvailabilityChecker";
+import UserManagement from "./pages/UserManagement";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -43,6 +44,7 @@ function Router() {
         <Route path="/featured-sections" component={FeaturedSections} />
         <Route path="/reels" component={Reels} />
         <Route path="/availability-checker" component={AvailabilityChecker} />
+        <Route path="/user-management" component={UserManagement} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

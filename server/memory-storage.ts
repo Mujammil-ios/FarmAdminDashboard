@@ -38,6 +38,7 @@ import {
   type TransactionWithDetails,
 } from "@shared/schema";
 import { IStorage } from "./storage";
+import { EnhancedDataService } from "./enhanced-data-service";
 
 export class MemoryStorage implements IStorage {
   private admins: Admin[] = [];
@@ -58,21 +59,29 @@ export class MemoryStorage implements IStorage {
   private featuredSectionFarms: FeaturedSectionFarm[] = [];
   private reels: Reel[] = [];
 
+  private enhancedDataService: EnhancedDataService;
   private nextId = 1;
 
   constructor() {
+    this.enhancedDataService = new EnhancedDataService();
     this.initializeData();
   }
 
   private initializeData() {
-    // Initialize Cities
-    this.cities = [
-      { id: 1, name: "Mumbai", state: "Maharashtra", isEnable: true, createdAt: new Date(), updatedAt: new Date() },
-      { id: 2, name: "Delhi", state: "Delhi", isEnable: true, createdAt: new Date(), updatedAt: new Date() },
-      { id: 3, name: "Bangalore", state: "Karnataka", isEnable: true, createdAt: new Date(), updatedAt: new Date() },
-      { id: 4, name: "Pune", state: "Maharashtra", isEnable: true, createdAt: new Date(), updatedAt: new Date() },
-      { id: 5, name: "Chennai", state: "Tamil Nadu", isEnable: true, createdAt: new Date(), updatedAt: new Date() },
+    // Initialize comprehensive cities data
+    const citiesData = [
+      "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", "Kolkata", "Pune", "Jaipur", "Surat",
+      "Lucknow", "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal", "Visakhapatnam", "Patna", "Vadodara", "Ghaziabad",
+      "Ludhiana", "Agra", "Nashik", "Faridabad", "Meerut", "Rajkot", "Varanasi", "Amritsar", "Allahabad", "Ranchi"
     ];
+    
+    this.cities = citiesData.map((city, index) => ({
+      id: index + 1,
+      name: city,
+      createdAt: new Date(2023, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+      updatedAt: new Date(),
+      deletedAt: null
+    }));
 
     // Initialize Areas
     this.areas = [

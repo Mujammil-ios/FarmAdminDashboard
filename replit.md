@@ -104,6 +104,15 @@ The application implements a sophisticated slot booking system:
 ## Changelog
 ```
 Changelog:
+- June 27, 2025. Migrated project to standard Replit environment and implemented comprehensive Farm Performance analytics
+  * Successfully migrated from Replit Agent to standard Replit environment
+  * Implemented comprehensive Farm Performance dashboard with global metrics and individual farm analytics
+  * Added interactive calendar views with booking status indicators
+  * Created detailed farm-wise performance tracking with monthly metrics
+  * Enhanced data services with realistic, comprehensive sample data across all features
+  * Added booking history, transaction tracking, reviews, and owner payout management
+  * Integrated advanced charting with trend analysis and top performer rankings
+  * Enhanced sidebar navigation with Farm Performance section
 - June 27, 2025. Implemented comprehensive user management system with Firebase Auth integration
   * Added advanced customer and owner profile management
   * Implemented role-based access control with granular permissions

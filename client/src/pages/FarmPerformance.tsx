@@ -1,712 +1,404 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { 
+  BarChart, 
+  Bar, 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer 
+} from "recharts";
 import { 
   TrendingUp, 
   DollarSign, 
   Star, 
   Users, 
   Building, 
-  CalendarDays,
+  Calendar,
+  ArrowRight,
   ChevronLeft,
-  ChevronRight,
-  Eye,
-  MapPin,
-  Phone,
-  Mail,
-  Calendar as CalendarIcon,
-  Activity,
-  Target,
-  Clock
+  ChevronRight
 } from "lucide-react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay } from "date-fns";
-
-interface FarmPerformanceKPIs {
-  totalBookings: number;
-  totalRevenue: number;
-  totalCommission: number;
-  averageReviewScore: number;
-  activeOwners: number;
-  activeProperties: number;
-  bookingTrend: Array<{
-    date: string;
-    bookings: number;
-    cancellations: number;
-  }>;
-  topFarms: Array<{
-    id: number;
-    name: string;
-    bookings7d: number;
-    revenue: number;
-    avgRating: number;
-    cancellationRate: number;
-    location: string;
-  }>;
-}
-
-interface FarmDetailPerformance {
-  farm: {
-    id: number;
-    name: string;
-    owner: string;
-    type: string;
-    location: string;
-    phone: string;
-    email: string;
-  };
-  monthlyKPIs: {
-    totalBookings: number;
-    bookingRevenue: number;
-    platformCommission: number;
-    occupancyRate: number;
-    cancellationRate: number;
-    averageLeadTime: number;
-    averageReviewScore: number;
-  };
-  calendarEvents: Array<{
-    date: string;
-    bookings: number;
-    cancellations: number;
-    ownerOfflineBookings: number;
-  }>;
-  bookingHistory: Array<{
-    id: string;
-    customerName: string;
-    checkIn: string;
-    checkOut: string;
-    amountPaid: number;
-    status: string;
-  }>;
-  transactions: Array<{
-    id: string;
-    date: string;
-    type: string;
-    amount: number;
-    balanceDue: number;
-  }>;
-  reviews: Array<{
-    id: string;
-    reviewerName: string;
-    rating: number;
-    date: string;
-    comment: string;
-  }>;
-  ownerPayouts: Array<{
-    id: string;
-    payoutDate: string;
-    amountPaid: number;
-    outstandingCommission: number;
-    paymentMethod: string;
-  }>;
-}
+import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
+import type { 
+  FarmPerformanceMetrics, 
+  DailyBookingTrend, 
+  TopFarm, 
+  CalendarDayStatus 
+} from "@shared/farm-performance-schema";
+import IndividualFarmView from "@/components/farm-performance/IndividualFarmView";
 
 export default function FarmPerformance() {
-  const [view, setView] = useState<'global' | 'farm'>('global');
-  const [selectedFarmId, setSelectedFarmId] = useState<number | null>(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [kpiRange, setKpiRange] = useState<'7' | '30' | 'all'>('30');
+  const [selectedFarmId, setSelectedFarmId] = useState<number | null>(null);
 
-  // Global dashboard data
-  const { data: globalData, isLoading: globalLoading } = useQuery<FarmPerformanceKPIs>({
-    queryKey: ['/api/admin/farms/summary', kpiRange],
-    enabled: view === 'global'
+  // Fetch global metrics
+  const { data: globalMetrics } = useQuery<FarmPerformanceMetrics>({
+    queryKey: ["/api/farm-performance/global-metrics"],
   });
 
-  // Individual farm data
-  const { data: farmData, isLoading: farmLoading } = useQuery<FarmDetailPerformance>({
-    queryKey: ['/api/admin/farms/performance', selectedFarmId, format(selectedMonth, 'yyyy-MM')],
-    enabled: view === 'farm' && selectedFarmId !== null
+  // Fetch daily trends
+  const { data: dailyTrends } = useQuery<DailyBookingTrend[]>({
+    queryKey: ["/api/farm-performance/daily-trends"],
   });
 
-  const handleFarmDrillDown = (farmId: number) => {
-    setSelectedFarmId(farmId);
-    setView('farm');
+  // Fetch top farms
+  const { data: topFarms } = useQuery<TopFarm[]>({
+    queryKey: ["/api/farm-performance/top-farms"],
+  });
+
+  // Fetch global calendar data
+  const { data: globalCalendarData } = useQuery<CalendarDayStatus[]>({
+    queryKey: [
+      "/api/farm-performance/global-calendar",
+      selectedMonth.getFullYear(),
+      selectedMonth.getMonth() + 1,
+    ],
+  });
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 0,
+    }).format(amount);
   };
 
-  const handleBackToGlobal = () => {
-    setView('global');
-    setSelectedFarmId(null);
+  const formatCompactCurrency = (amount: number) => {
+    if (amount >= 10000000) {
+      return `₹${(amount / 10000000).toFixed(1)}Cr`;
+    } else if (amount >= 100000) {
+      return `₹${(amount / 100000).toFixed(1)}L`;
+    } else if (amount >= 1000) {
+      return `₹${(amount / 1000).toFixed(1)}K`;
+    }
+    return `₹${amount}`;
   };
 
-  const getCalendarCellStyle = (date: Date) => {
-    if (!farmData?.calendarEvents) return '';
+  const getCalendarDayClass = (day: CalendarDayStatus) => {
+    const classes = ["w-8 h-8 text-xs flex items-center justify-center rounded relative"];
     
-    const event = farmData.calendarEvents.find(e => 
-      isSameDay(new Date(e.date), date)
-    );
+    if (day.hasBookings) {
+      classes.push("border-b-2 border-green-500");
+    }
+    if (day.hasCancellations) {
+      classes.push("border-b-2 border-red-500");
+    }
+    if (day.hasOfflineBookings) {
+      classes.push("border-b-2 border-blue-500");
+    }
     
-    if (!event) return '';
-    
-    let styles = [];
-    if (event.bookings > 0) styles.push('border-b-2 border-green-500');
-    if (event.cancellations > 0) styles.push('border-b-2 border-red-500');
-    if (event.ownerOfflineBookings > 0) styles.push('border-b-2 border-blue-500');
-    
-    return styles.join(' ');
+    return classes.join(" ");
   };
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setSelectedMonth(prev => {
-      const newDate = new Date(prev);
-      if (direction === 'prev') {
-        newDate.setMonth(newDate.getMonth() - 1);
-      } else {
-        newDate.setMonth(newDate.getMonth() + 1);
-      }
-      return newDate;
-    });
-  };
+  const renderCalendarMonth = () => {
+    if (!globalCalendarData) return null;
 
-  if (view === 'global') {
-    return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Farm Performance Dashboard</h1>
-            <p className="text-muted-foreground">Monitor and analyze performance across all properties</p>
-          </div>
-          <Select value={kpiRange} onValueChange={(value: '7' | '30' | 'all') => setKpiRange(value)}>
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">Last 7 days</SelectItem>
-              <SelectItem value="30">Last 30 days</SelectItem>
-              <SelectItem value="all">All time</SelectItem>
-            </SelectContent>
-          </Select>
+    const monthStart = startOfMonth(selectedMonth);
+    const monthEnd = endOfMonth(selectedMonth);
+    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+    
+    const weeks = [];
+    let currentWeek = [];
+    
+    // Add empty cells for days before month start
+    const startDayOfWeek = monthStart.getDay();
+    for (let i = 0; i < startDayOfWeek; i++) {
+      currentWeek.push(<div key={`empty-${i}`} className="w-8 h-8" />);
+    }
+    
+    daysInMonth.forEach((day, index) => {
+      const dayData = globalCalendarData.find(
+        d => d.date === format(day, "yyyy-MM-dd")
+      );
+      
+      currentWeek.push(
+        <div
+          key={index}
+          className={getCalendarDayClass(dayData || {
+            date: format(day, "yyyy-MM-dd"),
+            hasBookings: false,
+            hasCancellations: false,
+            hasOfflineBookings: false,
+            bookingCount: 0,
+            cancellationCount: 0,
+          })}
+          title={`${format(day, "MMM d")}: ${dayData?.bookingCount || 0} bookings, ${dayData?.cancellationCount || 0} cancellations`}
+        >
+          {day.getDate()}
         </div>
-
-        {globalLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader className="pb-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-8 bg-gray-200 rounded w-1/2"></div>
-                </CardContent>
-              </Card>
-            ))}
+      );
+      
+      if (currentWeek.length === 7 || index === daysInMonth.length - 1) {
+        weeks.push(
+          <div key={weeks.length} className="flex gap-1 justify-center">
+            {currentWeek}
           </div>
-        ) : (
-          <>
-            {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{globalData?.totalBookings?.toLocaleString()}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {kpiRange === '7' ? 'Last 7 days' : kpiRange === '30' ? 'Last 30 days' : 'All time'}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">₹{globalData?.totalRevenue?.toLocaleString()}</div>
-                  <p className="text-xs text-muted-foreground">Customer payments collected</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Commission Earned</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">₹{globalData?.totalCommission?.toLocaleString()}</div>
-                  <p className="text-xs text-muted-foreground">Platform fees collected</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
-                  <Star className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{globalData?.averageReviewScore?.toFixed(1)}</div>
-                  <p className="text-xs text-muted-foreground">Across all properties</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Active Owners</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{globalData?.activeOwners}</div>
-                  <p className="text-xs text-muted-foreground">Property owners</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Active Properties</CardTitle>
-                  <Building className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{globalData?.activeProperties}</div>
-                  <p className="text-xs text-muted-foreground">Live listings</p>
-                </CardContent>
-              </Card>
+        );
+        currentWeek = [];
+      }
+    });
+    
+    return (
+      <div className="space-y-2">
+        <div className="flex justify-between items-center mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1))}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <h3 className="font-semibold">
+            {format(selectedMonth, "MMMM yyyy")}
+          </h3>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1))}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+        
+        <div className="flex gap-1 justify-center text-xs text-muted-foreground mb-2">
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
+            <div key={day} className="w-8 h-6 flex items-center justify-center font-medium">
+              {day}
             </div>
-
-            {/* Trend Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Booking Trends</CardTitle>
-                <CardDescription>Daily bookings vs cancellations over the past 30 days</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={globalData?.bookingTrend || []}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="bookings" stroke="#22c55e" name="Bookings" />
-                    <Line type="monotone" dataKey="cancellations" stroke="#ef4444" name="Cancellations" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Top 5 Farms */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Top Performing Farms</CardTitle>
-                <CardDescription>Best performing properties by bookings and revenue</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Farm Name</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Bookings (7d)</TableHead>
-                      <TableHead>Revenue</TableHead>
-                      <TableHead>Avg Rating</TableHead>
-                      <TableHead>Cancellation Rate</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {globalData?.topFarms?.map((farm) => (
-                      <TableRow key={farm.id}>
-                        <TableCell className="font-medium">{farm.name}</TableCell>
-                        <TableCell>{farm.location}</TableCell>
-                        <TableCell>{farm.bookings7d}</TableCell>
-                        <TableCell>₹{farm.revenue.toLocaleString()}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            {farm.avgRating.toFixed(1)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={farm.cancellationRate > 20 ? 'destructive' : 'secondary'}>
-                            {farm.cancellationRate.toFixed(1)}%
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleFarmDrillDown(farm.id)}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View Details
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </>
-        )}
+          ))}
+        </div>
+        
+        <div className="space-y-1">
+          {weeks}
+        </div>
+        
+        <div className="flex gap-4 text-xs text-muted-foreground justify-center mt-4">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-1 bg-green-500 rounded" />
+            <span>Booked</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-1 bg-red-500 rounded" />
+            <span>Cancelled</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-1 bg-blue-500 rounded" />
+            <span>Offline</span>
+          </div>
+        </div>
       </div>
+    );
+  };
+
+  if (selectedFarmId) {
+    return (
+      <IndividualFarmView 
+        farmId={selectedFarmId} 
+        onBack={() => setSelectedFarmId(null)} 
+      />
     );
   }
 
-  // Farm Detail View
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={handleBackToGlobal}>
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Dashboard
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">{farmData?.farm.name}</h1>
-            <div className="flex items-center gap-4 text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Users className="h-4 w-4" />
-                {farmData?.farm.owner}
-              </span>
-              <span className="flex items-center gap-1">
-                <Building className="h-4 w-4" />
-                {farmData?.farm.type}
-              </span>
-              <span className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
-                {farmData?.farm.location}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => navigateMonth('prev')}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="font-medium px-4">
-            {format(selectedMonth, 'MMMM yyyy')}
-          </span>
-          <Button variant="outline" onClick={() => navigateMonth('next')}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Farm Performance</h1>
+          <p className="text-muted-foreground">
+            Comprehensive analytics and insights across all farms
+          </p>
         </div>
       </div>
 
-      {farmLoading ? (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader className="pb-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-                </CardContent>
-              </Card>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{globalMetrics?.totalBookings || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Last 7 days: {globalMetrics?.last7DaysBookings || 0}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {globalMetrics ? formatCompactCurrency(globalMetrics.totalRevenue) : "₹0"}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Customer payments collected
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Commission Earned</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {globalMetrics ? formatCompactCurrency(globalMetrics.totalCommission) : "₹0"}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Platform fees collected
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg Review Score</CardTitle>
+            <Star className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {globalMetrics?.averageReviewScore?.toFixed(1) || "0.0"}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Across all properties
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Owners</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{globalMetrics?.activeOwnersCount || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Farm owners registered
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Properties</CardTitle>
+            <Building className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{globalMetrics?.activePropertiesCount || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Listed and active farms
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts and Tables Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Trend Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Booking Trends (Last 30 Days)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={dailyTrends}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="date" 
+                  tickFormatter={(date) => format(new Date(date), "MMM d")}
+                />
+                <YAxis />
+                <Tooltip 
+                  labelFormatter={(date) => format(new Date(date), "MMM d, yyyy")}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="bookings" 
+                  stroke="#22c55e" 
+                  strokeWidth={2}
+                  name="Bookings"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="cancellations" 
+                  stroke="#ef4444" 
+                  strokeWidth={2}
+                  name="Cancellations"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Global Calendar */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Global Calendar Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {renderCalendarMonth()}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Top Farms Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Top 5 Performing Farms</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {topFarms?.map((farm, index) => (
+              <div key={farm.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="flex items-center gap-4">
+                  <Badge variant="secondary" className="w-8 h-8 rounded-full flex items-center justify-center">
+                    {index + 1}
+                  </Badge>
+                  <div>
+                    <h3 className="font-semibold">{farm.name}</h3>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span>Last 7 days: {farm.bookingsLast7Days} bookings</span>
+                      <span>Revenue: {formatCompactCurrency(farm.revenue)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-medium">{farm.averageRating}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {farm.cancellationRate}% cancellation
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedFarmId(farm.id)}
+                  >
+                    View Details
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
-        </div>
-      ) : (
-        <>
-          {/* Monthly KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{farmData?.monthlyKPIs.totalBookings}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">₹{farmData?.monthlyKPIs.bookingRevenue?.toLocaleString()}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Commission</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">₹{farmData?.monthlyKPIs.platformCommission?.toLocaleString()}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Occupancy Rate</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{farmData?.monthlyKPIs.occupancyRate?.toFixed(1)}%</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Cancellation Rate</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">{farmData?.monthlyKPIs.cancellationRate?.toFixed(1)}%</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Avg Lead Time</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{farmData?.monthlyKPIs.averageLeadTime} days</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Avg Rating</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold flex items-center gap-1">
-                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  {farmData?.monthlyKPIs.averageReviewScore?.toFixed(1)}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Contact Info</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-1">
-                <div className="flex items-center gap-1 text-sm">
-                  <Phone className="h-3 w-3" />
-                  {farmData?.farm.phone}
-                </div>
-                <div className="flex items-center gap-1 text-sm">
-                  <Mail className="h-3 w-3" />
-                  {farmData?.farm.email}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Monthly Calendar */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Monthly Calendar</CardTitle>
-              <CardDescription>
-                <div className="flex items-center gap-4 text-xs">
-                  <span className="flex items-center gap-1">
-                    <div className="w-3 h-0.5 bg-green-500"></div>
-                    Bookings
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <div className="w-3 h-0.5 bg-red-500"></div>
-                    Cancellations
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <div className="w-3 h-0.5 bg-blue-500"></div>
-                    Offline Bookings
-                  </span>
-                </div>
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-7 gap-2 mb-4">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                  <div key={day} className="text-center font-medium text-sm text-muted-foreground py-2">
-                    {day}
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-2">
-                {eachDayOfInterval({
-                  start: startOfMonth(selectedMonth),
-                  end: endOfMonth(selectedMonth)
-                }).map(date => {
-                  const event = farmData?.calendarEvents?.find(e => 
-                    isSameDay(new Date(e.date), date)
-                  );
-                  
-                  return (
-                    <div
-                      key={date.toISOString()}
-                      className={`
-                        aspect-square flex items-center justify-center text-sm border rounded-md cursor-pointer hover:bg-muted
-                        ${!isSameMonth(date, selectedMonth) ? 'text-muted-foreground' : ''}
-                        ${event?.bookings ? 'border-b-2 border-green-500' : ''}
-                        ${event?.cancellations ? 'border-b-2 border-red-500' : ''}
-                        ${event?.ownerOfflineBookings ? 'border-b-2 border-blue-500' : ''}
-                      `}
-                      title={
-                        event 
-                          ? `${event.bookings} bookings, ${event.cancellations} cancellations, ${event.ownerOfflineBookings} offline`
-                          : 'No bookings'
-                      }
-                    >
-                      {format(date, 'd')}
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Detailed Sections */}
-          <Tabs defaultValue="bookings" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="bookings">Booking History</TabsTrigger>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews</TabsTrigger>
-              <TabsTrigger value="payouts">Owner Payouts</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="bookings">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Booking History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Booking ID</TableHead>
-                        <TableHead>Customer Name</TableHead>
-                        <TableHead>Check-in Date</TableHead>
-                        <TableHead>Check-out Date</TableHead>
-                        <TableHead>Amount Paid</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {farmData?.bookingHistory?.map((booking) => (
-                        <TableRow key={booking.id}>
-                          <TableCell className="font-mono">{booking.id}</TableCell>
-                          <TableCell>{booking.customerName}</TableCell>
-                          <TableCell>{format(new Date(booking.checkIn), 'PPP')}</TableCell>
-                          <TableCell>{format(new Date(booking.checkOut), 'PPP')}</TableCell>
-                          <TableCell>₹{booking.amountPaid.toLocaleString()}</TableCell>
-                          <TableCell>
-                            <Badge variant={
-                              booking.status === 'confirmed' ? 'default' :
-                              booking.status === 'cancelled' ? 'destructive' :
-                              'secondary'
-                            }>
-                              {booking.status}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="transactions">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Transactions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Transaction ID</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Balance Due</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {farmData?.transactions?.map((transaction) => (
-                        <TableRow key={transaction.id}>
-                          <TableCell className="font-mono">{transaction.id}</TableCell>
-                          <TableCell>{format(new Date(transaction.date), 'PPP')}</TableCell>
-                          <TableCell>{transaction.type}</TableCell>
-                          <TableCell>₹{transaction.amount.toLocaleString()}</TableCell>
-                          <TableCell>₹{transaction.balanceDue.toLocaleString()}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="reviews">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reviews</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {farmData?.reviews?.map((review) => (
-                      <div key={review.id} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{review.reviewerName}</span>
-                            <div className="flex items-center gap-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`h-4 w-4 ${
-                                    i < review.rating 
-                                      ? 'fill-yellow-400 text-yellow-400' 
-                                      : 'text-gray-300'
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          <span className="text-sm text-muted-foreground">
-                            {format(new Date(review.date), 'PPP')}
-                          </span>
-                        </div>
-                        <p className="text-sm">{review.comment}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="payouts">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Owner Payouts</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Payout Date</TableHead>
-                        <TableHead>Amount Paid</TableHead>
-                        <TableHead>Outstanding Commission</TableHead>
-                        <TableHead>Payment Method</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {farmData?.ownerPayouts?.map((payout) => (
-                        <TableRow key={payout.id}>
-                          <TableCell>{format(new Date(payout.payoutDate), 'PPP')}</TableCell>
-                          <TableCell>₹{payout.amountPaid.toLocaleString()}</TableCell>
-                          <TableCell>₹{payout.outstandingCommission.toLocaleString()}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{payout.paymentMethod}</Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </>
-      )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

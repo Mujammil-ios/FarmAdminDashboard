@@ -28,6 +28,7 @@ import {
   ShoppingCart,
   Settings,
   Crown,
+  TrendingUp,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -53,6 +54,7 @@ const navigationGroups: NavigationGroup[] = [
     icon: BarChart3,
     items: [
       { name: "Dashboard", href: "/dashboard", icon: ChartLine },
+      { name: "Farm Performance", href: "/farm-performance", icon: TrendingUp },
       { name: "Availability Checker", href: "/availability-checker", icon: Search },
     ],
   },

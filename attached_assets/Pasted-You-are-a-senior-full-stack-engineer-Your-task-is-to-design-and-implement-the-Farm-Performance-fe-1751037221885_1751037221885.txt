@@ -1,0 +1,70 @@
+You are a senior full-stack engineer. Your task is to design and implement the “Farm Performance” feature for the Super-Admin of BookMyFarm. Follow these requirements precisely.
+
+1. **High-Level Overview**  
+   - The Super-Admin can view aggregate KPIs across all farms.  
+   - The Super-Admin can drill down into any individual farm to see detailed performance metrics for a selected month.
+
+2. **Global Dashboard (Landing Screen)**  
+   - **KPI Cards (top row)**  
+     1. Total Bookings (Last 7 days / 30 days / All time)  
+     2. Total Revenue Collected (sum of customer payments)  
+     3. Total Commission Earned (platform fees)  
+     4. Average Review Score (aggregated across all properties)  
+     5. Active Owners Count  
+     6. Active Properties Count  
+   - **Trend Chart**  
+     - Line-chart showing daily bookings vs. cancellations over the past 30 days.  
+   - **Top-5 Farms Table**  
+     - Columns: Farm Name, Bookings (Last 7d), Revenue, Avg. Rating, Cancellation Rate.  
+   - **Global Calendar Snapshot**  
+     - Small inline month-view calendar with color dots (green = booked, red = cancelled, grey = free) for each day.
+
+3. **Drill-Down: Individual Farm Performance Screen**  
+   - **Header**  
+     - Farm Name, Owner Name, Farm Type (Resort, Villa, etc.), Location  
+   - **Monthly Calendar View**  
+     - Full-width calendar for the selected month.  
+     - Color-codes:  
+       • **Green underline** under date = ≥1 successful booking  
+       • **Red underline** under date = ≥1 cancellation  
+       • **Blue underline** under date = ≥1 owner-side or offline booking  
+       • **No underline** = no bookings  
+     - Navigation arrows to move month-to-month.  
+   - **Key Metrics for Month**  
+     1. Total Bookings  
+     2. Booking Revenue  
+     3. Platform Commission  
+     4. Occupancy Rate (%) = (days booked / total days)  
+     5. Cancellation Rate (%) = (cancellations / bookings)  
+     6. Average Lead Time = average days between booking and stay date  
+     7. Average Review Score  
+   - **Detailed Sections (tabs or accordion)**  
+     - **Booking History**  
+       • Table: Booking ID, Customer Name, Check-in Date, Check-out Date, Amount Paid, Status  
+     - **Transactions**  
+       • Table: Transaction ID, Date, Type (Customer Payment / Commission Disbursement), Amount, Balance Due to Owner  
+     - **Reviews**  
+       • List: Reviewer Name, Rating, Date, Comment  
+     - **Owner Payouts**  
+       • Table: Payout Date, Amount Paid Out, Outstanding Commission, Payment Method  
+
+4. **Data
+Use static data from a proper class not static on page data get data strucurezed from a serpate class
+
+Dont use database in this projecdt
+
+
+5. **UI/UX Deliverables**  
+   - Provide wireframes for both the Global Dashboard and the Individual Farm screen.  
+   - Include hover-tooltips on calendar cells explaining counts (e.g. “2 bookings, 1 cancellation”).  
+   - Mobile-responsive behavior: collapse KPI cards into a carousel; calendar becomes scrollable.
+
+6. **Acceptance Criteria**  
+   - All KPI cards display accurate, up-to-the-minute data.  
+   - Calendar colors update correctly when bookings/cancellations occur.  
+   - Data tables support sorting and pagination.  
+   - Navigation between global and per-farm screens works without page reload (SPA).  
+   - Unit tests for API responses and UI components covering ≥80% code coverage.
+
+
+Deliver clear, production-ready code and documentation (README, API spec). Let’s make the Super-Admin’s Farm Performance feature a breeze to use!  

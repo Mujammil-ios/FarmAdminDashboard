@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { userManagementService } from "./user-management";
+import { FarmPerformanceDataService } from "./farm-performance-data";
 import { insertAdminSchema, insertUserSchema, insertFarmSchema, insertBookingSchema, insertTransactionSchema, insertRequestedFarmSchema, insertCategorySchema, insertAmenitySchema, insertCitySchema, insertAreaSchema, insertFaqSchema, insertSubPropertySchema, insertBannerSchema, insertFeaturedSectionSchema, insertReelSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1071,6 +1072,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating revenue report:", error);
       res.status(500).json({ message: "Failed to generate revenue report" });
+    }
+  });
+
+  // Farm Performance Routes
+  const farmPerformanceService = new FarmPerformanceDataService();
+
+  // Global farm performance metrics
+  app.get("/api/farm-performance/global-metrics", async (req, res) => {
+    try {
+      const metrics = farmPerformanceService.getGlobalMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error fetching global performance metrics:", error);
+      res.status(500).json({ message: "Failed to fetch global performance metrics" });
+    }
+  });
+
+  // Daily booking trends for the last 30 days
+  app.get("/api/farm-performance/daily-trends", async (req, res) => {
+    try {
+      const trends = farmPerformanceService.getDailyTrends();
+      res.json(trends);
+    } catch (error) {
+      console.error("Error fetching daily trends:", error);
+      res.status(500).json({ message: "Failed to fetch daily trends" });
+    }
+  });
+
+  // Top 5 performing farms
+  app.get("/api/farm-performance/top-farms", async (req, res) => {
+    try {
+      const topFarms = farmPerformanceService.getTopFarms();
+      res.json(topFarms);
+    } catch (error) {
+      console.error("Error fetching top farms:", error);
+      res.status(500).json({ message: "Failed to fetch top farms" });
+    }
+  });
+
+  // Global calendar data for a specific month
+  app.get("/api/farm-performance/global-calendar/:year/:month", async (req, res) => {
+    try {
+      const { year, month } = req.params;
+      const calendarData = farmPerformanceService.getGlobalCalendarData(
+        parseInt(month), 
+        parseInt(year)
+      );
+      res.json(calendarData);
+    } catch (error) {
+      console.error("Error fetching global calendar data:", error);
+      res.status(500).json({ message: "Failed to fetch global calendar data" });
+    }
+  });
+
+  // Individual farm performance for a specific month
+  app.get("/api/farm-performance/farm/:farmId/:year/:month", async (req, res) => {
+    try {
+      const { farmId, year, month } = req.params;
+      const farmPerformance = farmPerformanceService.getIndividualFarmPerformance(
+        parseInt(farmId),
+        parseInt(month),
+        parseInt(year)
+      );
+      res.json(farmPerformance);
+    } catch (error) {
+      console.error("Error fetching farm performance:", error);
+      res.status(500).json({ message: "Failed to fetch farm performance" });
+    }
+  });
+
+  // Farm calendar data for a specific month
+  app.get("/api/farm-performance/farm/:farmId/calendar/:year/:month", async (req, res) => {
+    try {
+      const { farmId, year, month } = req.params;
+      const calendarData = farmPerformanceService.getFarmCalendarData(
+        parseInt(farmId),
+        parseInt(month),
+        parseInt(year)
+      );
+      res.json(calendarData);
+    } catch (error) {
+      console.error("Error fetching farm calendar data:", error);
+      res.status(500).json({ message: "Failed to fetch farm calendar data" });
+    }
+  });
+
+  // Farm booking history for a specific month
+  app.get("/api/farm-performance/farm/:farmId/bookings/:year/:month", async (req, res) => {
+    try {
+      const { farmId, year, month } = req.params;
+      const bookingHistory = farmPerformanceService.getFarmBookingHistory(
+        parseInt(farmId),
+        parseInt(month),
+        parseInt(year)
+      );
+      res.json(bookingHistory);
+    } catch (error) {
+      console.error("Error fetching farm booking history:", error);
+      res.status(500).json({ message: "Failed to fetch farm booking history" });
+    }
+  });
+
+  // Farm transaction history for a specific month
+  app.get("/api/farm-performance/farm/:farmId/transactions/:year/:month", async (req, res) => {
+    try {
+      const { farmId, year, month } = req.params;
+      const transactionHistory = farmPerformanceService.getFarmTransactionHistory(
+        parseInt(farmId),
+        parseInt(month),
+        parseInt(year)
+      );
+      res.json(transactionHistory);
+    } catch (error) {
+      console.error("Error fetching farm transaction history:", error);
+      res.status(500).json({ message: "Failed to fetch farm transaction history" });
+    }
+  });
+
+  // Farm reviews
+  app.get("/api/farm-performance/farm/:farmId/reviews", async (req, res) => {
+    try {
+      const { farmId } = req.params;
+      const reviews = farmPerformanceService.getFarmReviews(parseInt(farmId));
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching farm reviews:", error);
+      res.status(500).json({ message: "Failed to fetch farm reviews" });
+    }
+  });
+
+  // Farm owner payouts
+  app.get("/api/farm-performance/farm/:farmId/payouts", async (req, res) => {
+    try {
+      const { farmId } = req.params;
+      const payouts = farmPerformanceService.getOwnerPayouts(parseInt(farmId));
+      res.json(payouts);
+    } catch (error) {
+      console.error("Error fetching farm payouts:", error);
+      res.status(500).json({ message: "Failed to fetch farm payouts" });
     }
   });
 

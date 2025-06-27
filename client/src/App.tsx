@@ -24,6 +24,7 @@ import UserManagement from "./pages/UserManagement";
 import CustomerManagement from "./pages/CustomerManagement";
 import OwnerManagement from "./pages/OwnerManagement";
 import PaymentManagement from "./pages/PaymentManagement";
+import FarmPerformance from "./pages/FarmPerformance";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -51,6 +52,7 @@ function Router() {
         <Route path="/customer-management" component={CustomerManagement} />
         <Route path="/owner-management" component={OwnerManagement} />
         <Route path="/payment-management" component={PaymentManagement} />
+        <Route path="/farm-performance" component={FarmPerformance} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

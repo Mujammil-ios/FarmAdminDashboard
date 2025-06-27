@@ -1,3 +1,4 @@
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getSlotStatus } from "@/lib/slots";
@@ -79,12 +80,12 @@ export default function AvailabilityCalendar() {
 
           {/* Farm rows with slots */}
           {sampleFarms.map((farm) => (
-            <>
-              <div key={farm.id} className="p-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg">
+            <React.Fragment key={farm.id}>
+              <div className="p-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg">
                 {farm.name}
               </div>
               {dates.map((date, dateIndex) => (
-                <div key={dateIndex} className="grid grid-cols-2 gap-1">
+                <div key={`${farm.id}-${dateIndex}`} className="grid grid-cols-2 gap-1">
                   <div
                     className={`w-full h-6 rounded text-xs text-white flex items-center justify-center ${getSlotColor(
                       getSlotStatus(date, 'morning', sampleBookings.filter(b => b.farmId === farm.id))
@@ -101,7 +102,7 @@ export default function AvailabilityCalendar() {
                   </div>
                 </div>
               ))}
-            </>
+            </React.Fragment>
           ))}
         </div>
       </CardContent>

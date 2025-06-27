@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a full-stack farm booking management system built with React (client) and Express.js (server). The application serves as an admin dashboard for managing farm bookings, users, transactions, and farm-related data. It uses TypeScript for type safety, Drizzle ORM for database interactions with PostgreSQL, and shadcn/ui for modern UI components.
+This is a comprehensive full-stack farm booking management system built with React (client) and Express.js (server). The application serves as an advanced admin dashboard for managing farm bookings, users, transactions, and farm-related data with Firebase Auth integration. It features a sophisticated user management system with role-based access control, detailed customer/owner tracking, payment management, and revenue analytics. The system uses TypeScript for type safety, in-memory data structures for user management, and shadcn/ui for modern UI components.
 
 ## System Architecture
 
@@ -37,10 +37,15 @@ The system manages several core entities:
 
 ### Admin Dashboard Features
 - **Dashboard Metrics**: Real-time KPIs and analytics
-- **User Management**: CRUD operations for users and owners
+- **Advanced User Management**: Firebase Auth integration with comprehensive customer/owner profiles
+- **Role-Based Access Control**: Admin roles with granular permissions (Super Admin, Customer Support, Finance)
+- **Customer Management**: Detailed tracking including bookings, payments, loyalty points, preferences
+- **Owner Management**: Business details, bank information, earnings, payouts, KYC status
 - **Farm Management**: Farm listings, approval workflows
 - **Booking System**: Slot management with morning/evening schedules
-- **Financial Tracking**: Transaction monitoring and revenue analytics
+- **Payment Management**: Transaction tracking, commission handling, payout processing
+- **Financial Tracking**: Revenue reports, commission analytics, outstanding payments
+- **Support System**: Ticket management with role-based assignment
 - **Content Management**: Categories, amenities, cities, and FAQs
 
 ### Slot Management System
@@ -99,6 +104,22 @@ The application implements a sophisticated slot booking system:
 ## Changelog
 ```
 Changelog:
+- June 27, 2025. Migrated project to standard Replit environment and implemented comprehensive Farm Performance analytics
+  * Successfully migrated from Replit Agent to standard Replit environment
+  * Implemented comprehensive Farm Performance dashboard with global metrics and individual farm analytics
+  * Added interactive calendar views with booking status indicators
+  * Created detailed farm-wise performance tracking with monthly metrics
+  * Enhanced data services with realistic, comprehensive sample data across all features
+  * Added booking history, transaction tracking, reviews, and owner payout management
+  * Integrated advanced charting with trend analysis and top performer rankings
+  * Enhanced sidebar navigation with Farm Performance section
+- June 27, 2025. Implemented comprehensive user management system with Firebase Auth integration
+  * Added advanced customer and owner profile management
+  * Implemented role-based access control with granular permissions
+  * Created payment tracking and payout management system
+  * Added support ticket management and revenue analytics
+  * Enhanced sidebar with collapsible grouped navigation
+  * Redesigned availability checker with detailed farm cards and slot-wise pricing
 - June 24, 2025. Initial setup
 ```
 

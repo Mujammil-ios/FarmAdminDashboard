@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { userManagementService } from "./user-management";
+import { FarmPerformanceDataService } from "./farm-performance-data";
 import { insertAdminSchema, insertUserSchema, insertFarmSchema, insertBookingSchema, insertTransactionSchema, insertRequestedFarmSchema, insertCategorySchema, insertAmenitySchema, insertCitySchema, insertAreaSchema, insertFaqSchema, insertSubPropertySchema, insertBannerSchema, insertFeaturedSectionSchema, insertReelSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -844,6 +846,371 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error checking availability:", error);
       res.status(500).json({ message: "Failed to check availability" });
+    }
+  });
+
+  // ===== USER MANAGEMENT API ROUTES =====
+
+  // Search users by Firebase ID or phone
+  app.get("/api/user-management/search", async (req, res) => {
+    try {
+      const { firebaseId, phone } = req.query;
+      
+      let user = null;
+      if (firebaseId) {
+        user = userManagementService.getUserByFirebaseId(firebaseId as string);
+      } else if (phone) {
+        user = userManagementService.getUserByPhone(phone as string);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error searching user:", error);
+      res.status(500).json({ message: "Failed to search user" });
+    }
+  });
+
+  // Customer Management Routes
+  app.get("/api/user-management/customers", async (req, res) => {
+    try {
+      const customers = userManagementService.getAllCustomers();
+      res.json(customers);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      res.status(500).json({ message: "Failed to fetch customers" });
+    }
+  });
+
+  app.get("/api/user-management/customers/:id", async (req, res) => {
+    try {
+      const customer = userManagementService.getCustomerById(req.params.id);
+      if (!customer) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      res.json(customer);
+    } catch (error) {
+      console.error("Error fetching customer:", error);
+      res.status(500).json({ message: "Failed to fetch customer" });
+    }
+  });
+
+  app.get("/api/user-management/customers/:id/bookings", async (req, res) => {
+    try {
+      const bookings = userManagementService.getCustomerBookings(req.params.id);
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error fetching customer bookings:", error);
+      res.status(500).json({ message: "Failed to fetch customer bookings" });
+    }
+  });
+
+  app.get("/api/user-management/customers/:id/activities", async (req, res) => {
+    try {
+      const activities = userManagementService.getCustomerActivities(req.params.id);
+      res.json(activities);
+    } catch (error) {
+      console.error("Error fetching customer activities:", error);
+      res.status(500).json({ message: "Failed to fetch customer activities" });
+    }
+  });
+
+  app.get("/api/user-management/customers/:id/payments", async (req, res) => {
+    try {
+      const payments = userManagementService.getPaymentsByCustomer(req.params.id);
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching customer payments:", error);
+      res.status(500).json({ message: "Failed to fetch customer payments" });
+    }
+  });
+
+  // Owner Management Routes
+  app.get("/api/user-management/owners", async (req, res) => {
+    try {
+      const owners = userManagementService.getAllOwners();
+      res.json(owners);
+    } catch (error) {
+      console.error("Error fetching owners:", error);
+      res.status(500).json({ message: "Failed to fetch owners" });
+    }
+  });
+
+  app.get("/api/user-management/owners/:id", async (req, res) => {
+    try {
+      const owner = userManagementService.getOwnerById(req.params.id);
+      if (!owner) {
+        return res.status(404).json({ message: "Owner not found" });
+      }
+      res.json(owner);
+    } catch (error) {
+      console.error("Error fetching owner:", error);
+      res.status(500).json({ message: "Failed to fetch owner" });
+    }
+  });
+
+  app.get("/api/user-management/owners/:id/bookings", async (req, res) => {
+    try {
+      const bookings = userManagementService.getOwnerBookings(req.params.id);
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error fetching owner bookings:", error);
+      res.status(500).json({ message: "Failed to fetch owner bookings" });
+    }
+  });
+
+  app.get("/api/user-management/owners/:id/payouts", async (req, res) => {
+    try {
+      const payouts = userManagementService.getOwnerPayouts(req.params.id);
+      res.json(payouts);
+    } catch (error) {
+      console.error("Error fetching owner payouts:", error);
+      res.status(500).json({ message: "Failed to fetch owner payouts" });
+    }
+  });
+
+  app.get("/api/user-management/owners/:id/activities", async (req, res) => {
+    try {
+      const activities = userManagementService.getOwnerActivities(req.params.id);
+      res.json(activities);
+    } catch (error) {
+      console.error("Error fetching owner activities:", error);
+      res.status(500).json({ message: "Failed to fetch owner activities" });
+    }
+  });
+
+  app.get("/api/user-management/owners/:id/payments", async (req, res) => {
+    try {
+      const payments = userManagementService.getPaymentsByOwner(req.params.id);
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching owner payments:", error);
+      res.status(500).json({ message: "Failed to fetch owner payments" });
+    }
+  });
+
+  // Admin Role Management Routes
+  app.get("/api/user-management/admin-roles", async (req, res) => {
+    try {
+      const roles = userManagementService.getAllAdminRoles();
+      res.json(roles);
+    } catch (error) {
+      console.error("Error fetching admin roles:", error);
+      res.status(500).json({ message: "Failed to fetch admin roles" });
+    }
+  });
+
+  app.get("/api/user-management/admin-users", async (req, res) => {
+    try {
+      const adminUsers = userManagementService.getAllAdminUsers();
+      res.json(adminUsers);
+    } catch (error) {
+      console.error("Error fetching admin users:", error);
+      res.status(500).json({ message: "Failed to fetch admin users" });
+    }
+  });
+
+  app.get("/api/user-management/admin-users/:id", async (req, res) => {
+    try {
+      const adminUser = userManagementService.getAdminUserById(req.params.id);
+      if (!adminUser) {
+        return res.status(404).json({ message: "Admin user not found" });
+      }
+      res.json(adminUser);
+    } catch (error) {
+      console.error("Error fetching admin user:", error);
+      res.status(500).json({ message: "Failed to fetch admin user" });
+    }
+  });
+
+  // Payment Management Routes
+  app.get("/api/user-management/payments", async (req, res) => {
+    try {
+      const payments = userManagementService.getAllPayments();
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+      res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
+  // Support Ticket Management Routes
+  app.get("/api/user-management/support-tickets", async (req, res) => {
+    try {
+      const tickets = userManagementService.getAllSupportTickets();
+      res.json(tickets);
+    } catch (error) {
+      console.error("Error fetching support tickets:", error);
+      res.status(500).json({ message: "Failed to fetch support tickets" });
+    }
+  });
+
+  app.get("/api/user-management/support-tickets/user/:userId", async (req, res) => {
+    try {
+      const tickets = userManagementService.getSupportTicketsByUser(req.params.userId);
+      res.json(tickets);
+    } catch (error) {
+      console.error("Error fetching user support tickets:", error);
+      res.status(500).json({ message: "Failed to fetch user support tickets" });
+    }
+  });
+
+  // Revenue Report Routes
+  app.get("/api/user-management/revenue-report", async (req, res) => {
+    try {
+      const { fromDate, toDate } = req.query;
+      
+      if (!fromDate || !toDate) {
+        return res.status(400).json({ message: "From date and to date are required" });
+      }
+      
+      const report = userManagementService.generateRevenueReport(fromDate as string, toDate as string);
+      res.json(report);
+    } catch (error) {
+      console.error("Error generating revenue report:", error);
+      res.status(500).json({ message: "Failed to generate revenue report" });
+    }
+  });
+
+  // Farm Performance Routes
+  const farmPerformanceService = new FarmPerformanceDataService();
+
+  // Global farm performance metrics
+  app.get("/api/farm-performance/global-metrics", async (req, res) => {
+    try {
+      const metrics = farmPerformanceService.getGlobalMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error fetching global performance metrics:", error);
+      res.status(500).json({ message: "Failed to fetch global performance metrics" });
+    }
+  });
+
+  // Daily booking trends for the last 30 days
+  app.get("/api/farm-performance/daily-trends", async (req, res) => {
+    try {
+      const trends = farmPerformanceService.getDailyTrends();
+      res.json(trends);
+    } catch (error) {
+      console.error("Error fetching daily trends:", error);
+      res.status(500).json({ message: "Failed to fetch daily trends" });
+    }
+  });
+
+  // Top 5 performing farms
+  app.get("/api/farm-performance/top-farms", async (req, res) => {
+    try {
+      const topFarms = farmPerformanceService.getTopFarms();
+      res.json(topFarms);
+    } catch (error) {
+      console.error("Error fetching top farms:", error);
+      res.status(500).json({ message: "Failed to fetch top farms" });
+    }
+  });
+
+  // Global calendar data for a specific month
+  app.get("/api/farm-performance/global-calendar/:year/:month", async (req, res) => {
+    try {
+      const { year, month } = req.params;
+      const calendarData = farmPerformanceService.getGlobalCalendarData(
+        parseInt(month), 
+        parseInt(year)
+      );
+      res.json(calendarData);
+    } catch (error) {
+      console.error("Error fetching global calendar data:", error);
+      res.status(500).json({ message: "Failed to fetch global calendar data" });
+    }
+  });
+
+  // Individual farm performance for a specific month
+  app.get("/api/farm-performance/farm/:farmId/:year/:month", async (req, res) => {
+    try {
+      const { farmId, year, month } = req.params;
+      const farmPerformance = farmPerformanceService.getIndividualFarmPerformance(
+        parseInt(farmId),
+        parseInt(month),
+        parseInt(year)
+      );
+      res.json(farmPerformance);
+    } catch (error) {
+      console.error("Error fetching farm performance:", error);
+      res.status(500).json({ message: "Failed to fetch farm performance" });
+    }
+  });
+
+  // Farm calendar data for a specific month
+  app.get("/api/farm-performance/farm/:farmId/calendar/:year/:month", async (req, res) => {
+    try {
+      const { farmId, year, month } = req.params;
+      const calendarData = farmPerformanceService.getFarmCalendarData(
+        parseInt(farmId),
+        parseInt(month),
+        parseInt(year)
+      );
+      res.json(calendarData);
+    } catch (error) {
+      console.error("Error fetching farm calendar data:", error);
+      res.status(500).json({ message: "Failed to fetch farm calendar data" });
+    }
+  });
+
+  // Farm booking history for a specific month
+  app.get("/api/farm-performance/farm/:farmId/bookings/:year/:month", async (req, res) => {
+    try {
+      const { farmId, year, month } = req.params;
+      const bookingHistory = farmPerformanceService.getFarmBookingHistory(
+        parseInt(farmId),
+        parseInt(month),
+        parseInt(year)
+      );
+      res.json(bookingHistory);
+    } catch (error) {
+      console.error("Error fetching farm booking history:", error);
+      res.status(500).json({ message: "Failed to fetch farm booking history" });
+    }
+  });
+
+  // Farm transaction history for a specific month
+  app.get("/api/farm-performance/farm/:farmId/transactions/:year/:month", async (req, res) => {
+    try {
+      const { farmId, year, month } = req.params;
+      const transactionHistory = farmPerformanceService.getFarmTransactionHistory(
+        parseInt(farmId),
+        parseInt(month),
+        parseInt(year)
+      );
+      res.json(transactionHistory);
+    } catch (error) {
+      console.error("Error fetching farm transaction history:", error);
+      res.status(500).json({ message: "Failed to fetch farm transaction history" });
+    }
+  });
+
+  // Farm reviews
+  app.get("/api/farm-performance/farm/:farmId/reviews", async (req, res) => {
+    try {
+      const { farmId } = req.params;
+      const reviews = farmPerformanceService.getFarmReviews(parseInt(farmId));
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching farm reviews:", error);
+      res.status(500).json({ message: "Failed to fetch farm reviews" });
+    }
+  });
+
+  // Farm owner payouts
+  app.get("/api/farm-performance/farm/:farmId/payouts", async (req, res) => {
+    try {
+      const { farmId } = req.params;
+      const payouts = farmPerformanceService.getOwnerPayouts(parseInt(farmId));
+      res.json(payouts);
+    } catch (error) {
+      console.error("Error fetching farm payouts:", error);
+      res.status(500).json({ message: "Failed to fetch farm payouts" });
     }
   });
 

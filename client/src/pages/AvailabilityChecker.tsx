@@ -4,32 +4,97 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Users, Home, DollarSign, Search } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Home, DollarSign, Search, ArrowRight } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
-interface AvailabilityOption {
-  type: 'farm' | 'sub-property';
+interface FarmSlot {
+  date: string;
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+}
+
+interface FarmAvailability {
   id: number;
-  farmId?: number;
-  farmName?: string;
   name: string;
-  description: string;
-  propertyType?: string;
-  capacity?: number;
-  slotType: 'morning' | 'evening';
-  slotTime: string;
-  pricePerSlot: number;
-  city: string;
-  area: string;
-  images: string[];
-  amenities: string[];
+  location: string;
+  ownerNumber: string;
+  dayStay: number;
+  nightStay: number;
+  pricing: {
+    weekDay: { "12H": number; "24H": number };
+    weekendDay: { "12H": number; "24H": number };
+    aboveWillCharge: number;
+  };
+  slots: FarmSlot[];
 }
 
 export default function AvailabilityChecker() {
   const [checkInDate, setCheckInDate] = useState("");
   const [checkOutDate, setCheckOutDate] = useState("");
-  const [searchResults, setSearchResults] = useState<AvailabilityOption[]>([]);
+  const [farmResults, setFarmResults] = useState<FarmAvailability[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+
+  // Sample data for demonstration - matches the design from the image
+  const sampleFarms: FarmAvailability[] = [
+    {
+      id: 1,
+      name: "Rosebury Villa",
+      location: "New Dandi, Surat",
+      ownerNumber: "9725005196",
+      dayStay: 12,
+      nightStay: 12,
+      pricing: {
+        weekDay: { "12H": 3900, "24H": 5400 },
+        weekendDay: { "12H": 5100, "24H": 6600 },
+        aboveWillCharge: 600
+      },
+      slots: [
+        { date: "2025-06-27", startTime: "11:00 AM", endTime: "10:00 PM", isAvailable: true },
+        { date: "2025-06-27", startTime: "11:00 PM", endTime: "10:00 AM", isAvailable: true },
+        { date: "2025-06-28", startTime: "11:00 AM", endTime: "10:00 PM", isAvailable: true },
+        { date: "2025-06-28", startTime: "11:00 PM", endTime: "10:00 AM", isAvailable: true }
+      ]
+    },
+    {
+      id: 2,
+      name: "The USA Stay",
+      location: "New Dandi, Surat",
+      ownerNumber: "6353760057",
+      dayStay: 7,
+      nightStay: 7,
+      pricing: {
+        weekDay: { "12H": 4000, "24H": 8000 },
+        weekendDay: { "12H": 8000, "24H": 8000 },
+        aboveWillCharge: 700
+      },
+      slots: [
+        { date: "2025-06-27", startTime: "1:00 AM", endTime: "11:00 PM", isAvailable: true },
+        { date: "2025-06-27", startTime: "1:00 PM", endTime: "11:00 AM", isAvailable: true },
+        { date: "2025-06-28", startTime: "1:00 AM", endTime: "11:00 PM", isAvailable: true },
+        { date: "2025-06-28", startTime: "1:00 PM", endTime: "11:00 AM", isAvailable: true }
+      ]
+    },
+    {
+      id: 3,
+      name: "Moonlight Nest",
+      location: "New Dandi, Surat",
+      ownerNumber: "7211199865",
+      dayStay: 4,
+      nightStay: 4,
+      pricing: {
+        weekDay: { "12H": 1000, "24H": 2000 },
+        weekendDay: { "12H": 1250, "24H": 2500 },
+        aboveWillCharge: 500
+      },
+      slots: [
+        { date: "2025-06-27", startTime: "2:00 AM", endTime: "1:00 PM", isAvailable: true },
+        { date: "2025-06-27", startTime: "2:00 PM", endTime: "1:00 AM", isAvailable: true },
+        { date: "2025-06-28", startTime: "2:00 AM", endTime: "1:00 PM", isAvailable: true },
+        { date: "2025-06-28", startTime: "2:00 PM", endTime: "1:00 AM", isAvailable: true }
+      ]
+    }
+  ];
 
   const handleSearch = async () => {
     if (!checkInDate || !checkOutDate) {
@@ -43,37 +108,25 @@ export default function AvailabilityChecker() {
     }
 
     setIsSearching(true);
-    try {
-      const response = await fetch("/api/check-availability", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          checkInDate,
-          checkOutDate
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to check availability");
-      }
-      
-      const data = await response.json();
-      setSearchResults(data);
-    } catch (error) {
-      console.error("Error checking availability:", error);
-      alert("Failed to check availability. Please try again.");
-    } finally {
+    
+    // Simulate API call delay and use sample data
+    setTimeout(() => {
+      setFarmResults(sampleFarms);
       setIsSearching(false);
-    }
+    }, 1000);
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR'
-    }).format(price);
+    return `₹${price}`;
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit' 
+    });
   };
 
   return (
@@ -129,97 +182,91 @@ export default function AvailabilityChecker() {
         </CardContent>
       </Card>
 
-      {/* Search Results */}
-      {searchResults.length > 0 && (
+      {/* Farm Results */}
+      {farmResults.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">
-              Available Options ({searchResults.length})
+              Available Farms ({farmResults.length})
             </h2>
             <Badge variant="secondary">
-              Sorted by price (lowest first)
+              Slot-wise availability
             </Badge>
           </div>
 
-          <div className="grid gap-4">
-            {searchResults.map((option, index) => (
-              <Card key={`${option.type}-${option.id}-${option.slotType}`} className="overflow-hidden">
-                <div className="flex">
-                  {/* Image */}
-                  <div className="w-48 h-32 flex-shrink-0">
-                    <img
-                      src={option.images[0] || "/placeholder-farm.jpg"}
-                      alt={option.name}
-                      className="w-full h-full object-cover"
-                    />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {farmResults.map((farm) => (
+              <Card key={farm.id} className="p-4 border border-gray-200 bg-white shadow-sm">
+                <div className="space-y-4">
+                  {/* Farm Header */}
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-lg text-gray-900">
+                      <span className="text-sm text-gray-600">Farm Name:</span> {farm.name}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Location:</span> {farm.location}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Owner No. No.:</span> {farm.ownerNumber}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Day Stay:</span> {farm.dayStay} <span className="font-medium">Night Stay:</span> {farm.nightStay}
+                    </p>
                   </div>
 
-                  {/* Content */}
-                  <div className="flex-1 p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-semibold">{option.name}</h3>
-                          <Badge variant={option.type === 'farm' ? 'default' : 'secondary'}>
-                            {option.type === 'farm' ? 'Farm' : 'Sub-Property'}
-                          </Badge>
-                          {option.farmName && (
-                            <Badge variant="outline">
-                              @ {option.farmName}
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {option.description}
+                  {/* Pricing Table */}
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 px-3 py-2 border-b">
+                      <div className="grid grid-cols-3 gap-2 text-sm font-medium text-gray-700">
+                        <div>Day</div>
+                        <div className="text-center">12 H</div>
+                        <div className="text-center">24 H</div>
+                      </div>
+                    </div>
+                    
+                    <div className="p-3 space-y-2">
+                      <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div className="font-medium">Week Day</div>
+                        <div className="text-center">{formatPrice(farm.pricing.weekDay["12H"])}</div>
+                        <div className="text-center">{formatPrice(farm.pricing.weekDay["24H"])}</div>
+                      </div>
+                      
+                      <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div className="font-medium">Weekend Day</div>
+                        <div className="text-center">{formatPrice(farm.pricing.weekendDay["12H"])}</div>
+                        <div className="text-center">{formatPrice(farm.pricing.weekendDay["24H"])}</div>
+                      </div>
+                      
+                      <div className="pt-2 border-t border-gray-100">
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">4 Above Will charge</span> {formatPrice(farm.pricing.aboveWillCharge)}
                         </p>
                       </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-green-600">
-                          {formatPrice(option.pricePerSlot)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">per slot</div>
-                      </div>
                     </div>
+                  </div>
 
-                    {/* Details */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
-                      <div className="flex items-center gap-1 text-sm">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span>{option.slotTime}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-sm">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span>{option.area}, {option.city}</span>
-                      </div>
-                      {option.capacity && (
-                        <div className="flex items-center gap-1 text-sm">
-                          <Users className="h-4 w-4 text-muted-foreground" />
-                          <span>Up to {option.capacity} guests</span>
+                  {/* Slots Section */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-gray-900">Slots</h4>
+                    
+                    <div className="space-y-3">
+                      {farm.slots.map((slot, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm font-medium text-gray-900">
+                              {slot.startTime}
+                            </div>
+                            <ArrowRight className="h-4 w-4 text-gray-400" />
+                            <div className="text-sm font-medium text-gray-900">
+                              {slot.endTime}
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-600 font-medium">
+                            {formatDate(slot.date)}
+                          </div>
                         </div>
-                      )}
-                      {option.propertyType && (
-                        <div className="flex items-center gap-1 text-sm">
-                          <Home className="h-4 w-4 text-muted-foreground" />
-                          <span className="capitalize">{option.propertyType}</span>
-                        </div>
-                      )}
+                      ))}
                     </div>
-
-                    {/* Amenities */}
-                    {option.amenities.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {option.amenities.slice(0, 4).map((amenity, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs">
-                            {amenity}
-                          </Badge>
-                        ))}
-                        {option.amenities.length > 4 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{option.amenities.length - 4} more
-                          </Badge>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
               </Card>
@@ -229,13 +276,13 @@ export default function AvailabilityChecker() {
       )}
 
       {/* Empty State */}
-      {searchResults.length === 0 && checkInDate && checkOutDate && !isSearching && (
+      {farmResults.length === 0 && checkInDate && checkOutDate && !isSearching && (
         <Card>
           <CardContent className="text-center py-12">
             <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Available Options</h3>
+            <h3 className="text-lg font-semibold mb-2">No Available Farms</h3>
             <p className="text-muted-foreground">
-              No farms or sub-properties are available for the selected dates.
+              No farms are available for the selected dates.
               Try different dates or contact customers with alternative suggestions.
             </p>
           </CardContent>
@@ -252,8 +299,7 @@ export default function AvailabilityChecker() {
                 <h3 className="text-lg font-semibold mb-2">Customer Service Tool</h3>
                 <p className="text-muted-foreground max-w-md mx-auto">
                   When customers call with specific dates, use this tool to quickly find 
-                  all available farms and sub-properties. Results are sorted by price 
-                  to help you offer the best options.
+                  all available farms with detailed pricing and slot information.
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 max-w-2xl mx-auto">

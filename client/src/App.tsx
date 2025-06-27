@@ -21,6 +21,9 @@ import FeaturedSections from "./pages/FeaturedSections";
 import Reels from "./pages/Reels";
 import AvailabilityChecker from "./pages/AvailabilityChecker";
 import UserManagement from "./pages/UserManagement";
+import CustomerManagement from "./pages/CustomerManagement";
+import OwnerManagement from "./pages/OwnerManagement";
+import PaymentManagement from "./pages/PaymentManagement";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -45,6 +48,9 @@ function Router() {
         <Route path="/reels" component={Reels} />
         <Route path="/availability-checker" component={AvailabilityChecker} />
         <Route path="/user-management" component={UserManagement} />
+        <Route path="/customer-management" component={CustomerManagement} />
+        <Route path="/owner-management" component={OwnerManagement} />
+        <Route path="/payment-management" component={PaymentManagement} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

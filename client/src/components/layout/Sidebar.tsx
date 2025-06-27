@@ -27,6 +27,7 @@ import {
   UserCog,
   ShoppingCart,
   Settings,
+  Crown,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -59,8 +60,11 @@ const navigationGroups: NavigationGroup[] = [
     name: "User Management",
     icon: UserCog,
     items: [
-      { name: "Advanced User Management", href: "/user-management", icon: UserCog },
-      { name: "Users", href: "/users", icon: Users },
+      { name: "User Search & Overview", href: "/user-management", icon: UserCog },
+      { name: "Customer Management", href: "/customer-management", icon: Users },
+      { name: "Owner Management", href: "/owner-management", icon: Building },
+      { name: "Payment Management", href: "/payment-management", icon: CreditCard },
+      { name: "Basic Users", href: "/users", icon: Users },
       { name: "Reviews", href: "/reviews", icon: Star },
     ],
   },

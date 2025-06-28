@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Star, Heart, TrendingUp, Crown, ArrowUp, ArrowDown, Settings } from "lucide-react";
+import { Plus, Edit, Trash2, Star, Heart, TrendingUp, Crown, ArrowUp, ArrowDown, Settings, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -125,6 +125,9 @@ export default function FeaturedSections() {
   });
 
   const [selectedFarms, setSelectedFarms] = useState<number[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   const resetForm = () => {
     setFormData({
@@ -190,9 +193,32 @@ export default function FeaturedSections() {
     return typeConfig?.icon || "⭐";
   };
 
-  const availableFarms = farms.filter((farm: Farm) => 
-    !sectionFarms.some((sf: FeaturedSectionFarm) => sf.farmId === farm.id)
-  );
+  // Search and pagination logic
+  const availableFarms = useMemo(() => {
+    return (farms as Farm[]).filter((farm: Farm) => 
+      !sectionFarms.some((sf: FeaturedSectionFarm) => sf.farmId === farm.id)
+    );
+  }, [farms, sectionFarms]);
+
+  const filteredFarms = useMemo(() => {
+    return availableFarms.filter((farm: Farm) =>
+      farm.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      farm.ownerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      farm.address?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [availableFarms, searchTerm]);
+
+  const totalPages = Math.ceil(filteredFarms.length / itemsPerPage);
+  const paginatedFarms = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredFarms.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredFarms, currentPage, itemsPerPage]);
+
+  // Reset page when search changes
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="space-y-6">
@@ -425,39 +451,103 @@ export default function FeaturedSections() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Available Farms</CardTitle>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Available Properties ({filteredFarms.length})</span>
+                    {selectedFarms.length > 0 && (
+                      <Badge variant="secondary">
+                        {selectedFarms.length} selected
+                      </Badge>
+                    )}
+                  </CardTitle>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search by name, owner, or location..."
+                      value={searchTerm}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  {availableFarms.length === 0 ? (
-                    <p className="text-gray-500">All farms are already in this section</p>
+                <CardContent className="space-y-4">
+                  {filteredFarms.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">
+                        {searchTerm ? "No properties found matching your search" : "All properties are already in this section"}
+                      </p>
+                    </div>
                   ) : (
                     <>
-                      {availableFarms.map((farm: Farm) => (
-                        <div key={farm.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`farm-${farm.id}`}
-                            checked={selectedFarms.includes(farm.id)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                setSelectedFarms(prev => [...prev, farm.id]);
-                              } else {
-                                setSelectedFarms(prev => prev.filter(id => id !== farm.id));
-                              }
-                            }}
-                          />
-                          <Label htmlFor={`farm-${farm.id}`} className="flex-1">
-                            {farm.name}
-                          </Label>
+                      <div className="grid gap-3 max-h-96 overflow-y-auto">
+                        {paginatedFarms.map((farm: Farm) => (
+                          <div key={farm.id} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50">
+                            <Checkbox
+                              id={`farm-${farm.id}`}
+                              checked={selectedFarms.includes(farm.id)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedFarms(prev => [...prev, farm.id]);
+                                } else {
+                                  setSelectedFarms(prev => prev.filter(id => id !== farm.id));
+                                }
+                              }}
+                              className="mt-1"
+                            />
+                            <Label htmlFor={`farm-${farm.id}`} className="flex-1 cursor-pointer">
+                              <div className="space-y-1">
+                                <p className="font-medium text-sm">{farm.name}</p>
+                                <p className="text-xs text-gray-500">Owner: {farm.ownerName}</p>
+                                <p className="text-xs text-gray-400">{farm.address}</p>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    ₹{farm.morningSlotPrice?.toLocaleString()}/day
+                                  </Badge>
+                                  {farm.rating && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      ⭐ {farm.rating.toFixed(1)}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Pagination */}
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-between pt-4 border-t">
+                          <p className="text-sm text-gray-500">
+                            Page {currentPage} of {totalPages}
+                          </p>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                              disabled={currentPage === 1}
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                              disabled={currentPage === totalPages}
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                      ))}
+                      )}
                       
                       {selectedFarms.length > 0 && (
                         <Button
                           onClick={handleAddFarms}
                           disabled={addFarmMutation.isPending}
-                          className="w-full mt-4"
+                          className="w-full"
                         >
-                          Add Selected Farms ({selectedFarms.length})
+                          Add Selected Properties ({selectedFarms.length})
                         </Button>
                       )}
                     </>
@@ -467,31 +557,49 @@ export default function FeaturedSections() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Farms in Section</CardTitle>
+                  <CardTitle>Properties in Section ({(sectionFarms as FeaturedSectionFarm[]).length})</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  {sectionFarms.length === 0 ? (
-                    <p className="text-gray-500">No farms in this section yet</p>
+                <CardContent className="space-y-3">
+                  {(sectionFarms as FeaturedSectionFarm[]).length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No properties in this section yet</p>
+                      <p className="text-sm text-gray-400">Add properties from the left panel to get started</p>
+                    </div>
                   ) : (
-                    sectionFarms.map((sectionFarm: FeaturedSectionFarm) => {
-                      const farm = farms.find((f: Farm) => f.id === sectionFarm.farmId);
-                      return farm ? (
-                        <div key={sectionFarm.id} className="flex items-center justify-between">
-                          <span>{farm.name}</span>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => removeFarmMutation.mutate({
-                              sectionId: selectedSection,
-                              farmId: farm.id,
-                            })}
-                            disabled={removeFarmMutation.isPending}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : null;
-                    })
+                    <div className="max-h-96 overflow-y-auto space-y-3">
+                      {(sectionFarms as FeaturedSectionFarm[]).map((sectionFarm: FeaturedSectionFarm) => {
+                        const farm = (farms as Farm[]).find((f: Farm) => f.id === sectionFarm.farmId);
+                        return farm ? (
+                          <div key={sectionFarm.id} className="flex items-start justify-between p-3 border rounded-lg">
+                            <div className="flex-1 space-y-1">
+                              <p className="font-medium text-sm">{farm.name}</p>
+                              <p className="text-xs text-gray-500">Owner: {farm.ownerName}</p>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
+                                  ₹{farm.morningSlotPrice?.toLocaleString()}/day
+                                </Badge>
+                                {farm.rating && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    ⭐ {farm.rating.toFixed(1)}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => removeFarmMutation.mutate({
+                                sectionId: selectedSection,
+                                farmId: farm.id,
+                              })}
+                              disabled={removeFarmMutation.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : null;
+                      })}
+                    </div>
                   )}
                 </CardContent>
               </Card>

@@ -98,19 +98,42 @@ export class EnhancedDataService {
   ];
 
   private readonly farmNamesPool = [
-    "Green Valley Organic Farm", "Sunset Hills Resort", "Mountain View Retreat", "Riverside Camping",
-    "Forest Edge Villa", "Golden Harvest Farm", "Blue Sky Ranch", "Meadow Brook Estate",
-    "Pine Ridge Resort", "Wildflower Farm", "Crystal Lake Lodge", "Bamboo Grove Retreat",
-    "Highland Paradise", "Ocean Breeze Farm", "Desert Bloom Ranch", "Misty Mountain Lodge",
-    "Rainbow Valley Farm", "Serenity Springs Resort", "Thunder Peak Ranch", "Peaceful Valley Estate",
-    "Sunrise Meadows Farm", "Silver Stream Lodge", "Garden Paradise Resort", "Moonlight Bay Farm",
-    "Whispering Pines Ranch", "Aurora Hills Estate", "Zen Garden Retreat", "Emerald Valley Farm",
-    "Crimson Sunset Lodge", "Harmony Hills Resort", "Starlight Ranch", "Tranquil Waters Farm",
-    "Rocky Mountain Lodge", "Lavender Fields Estate", "Sapphire Lake Resort", "Twilight Grove Farm",
-    "Autumn Leaves Resort", "Spring Blossom Farm", "Winter Wonderland Lodge", "Summer Breeze Villa",
-    "Morning Dew Ranch", "Evening Star Farm", "Midnight Sky Lodge", "Dawn Break Resort",
-    "Rustic Charm Villa", "Urban Oasis Farm", "Country Side Retreat", "Valley Vista Lodge",
-    "Hill Top Paradise", "Lake Shore Resort", "River Bend Farm", "Coastal Retreat Villa"
+    // Organic Farms
+    "Green Valley Organic Farm", "Golden Harvest Farm", "Wildflower Farm", "Emerald Valley Farm", 
+    "Tranquil Waters Farm", "Twilight Grove Farm", "Spring Blossom Farm", "Evening Star Farm",
+    "River Bend Farm", "Sunshine Organic Farm", "Nature's Bounty Farm", "Earth Mother Farm",
+    "Fresh Fields Farm", "Harvest Moon Farm", "Pure Soil Farm", "Evergreen Organic Farm",
+    
+    // Luxury Resorts & Hotels
+    "Sunset Hills Resort", "Mountain View Retreat", "Pine Ridge Resort", "Serenity Springs Resort", 
+    "Garden Paradise Resort", "Harmony Hills Resort", "Sapphire Lake Resort", "Autumn Leaves Resort",
+    "Dawn Break Resort", "Lake Shore Resort", "Royal Heritage Resort", "Grand Palace Resort",
+    "Majestic Mountain Resort", "Paradise Valley Resort", "Elite Escape Resort", "Premium Heights Resort",
+    
+    // Villas & Boutique Properties
+    "Forest Edge Villa", "Summer Breeze Villa", "Rustic Charm Villa", "Coastal Retreat Villa",
+    "Hillside Haven Villa", "Serene Sanctuary Villa", "Luxury Lakeside Villa", "Boutique Garden Villa",
+    "Designer's Dream Villa", "Architect's Paradise Villa", "Infinity Pool Villa", "Sky Deck Villa",
+    
+    // Camps & Adventure Lodges
+    "Riverside Camping", "Crystal Lake Lodge", "Bamboo Grove Retreat", "Misty Mountain Lodge",
+    "Silver Stream Lodge", "Midnight Sky Lodge", "Valley Vista Lodge", "Rocky Mountain Lodge",
+    "Adventure Base Camp", "Wilderness Lodge", "Expedition Camp", "Summit View Lodge",
+    
+    // Ranches & Estates
+    "Blue Sky Ranch", "Meadow Brook Estate", "Thunder Peak Ranch", "Peaceful Valley Estate",
+    "Aurora Hills Estate", "Starlight Ranch", "Morning Dew Ranch", "Highland Paradise",
+    "Desert Bloom Ranch", "Whispering Pines Ranch", "Lavender Fields Estate", "Country Manor Estate",
+    
+    // Specialty Properties
+    "Ocean Breeze Farm", "Moonlight Bay Farm", "Urban Oasis Farm", "Country Side Retreat",
+    "Hill Top Paradise", "Zen Garden Retreat", "Wellness Sanctuary", "Yoga Retreat Center",
+    "Artist's Colony Villa", "Writer's Retreat Lodge", "Photographer's Paradise", "Birdwatcher's Haven",
+    
+    // Sub-Properties & Apartments
+    "Orchard View Apartment", "Garden Suite Complex", "Riverside Apartments", "Hillview Residency",
+    "Farm Stay Cottages", "Heritage Quarters", "Modern Eco Pods", "Treehouse Suites",
+    "Lakefront Cabins", "Mountain Chalets", "Valley View Flats", "Sunrise Apartments"
   ];
 
   private readonly ownerNamesPool = [
@@ -350,7 +373,7 @@ export class EnhancedDataService {
   // Generate comprehensive farm data
   generateFarms(categories: Category[], cities: City[], areas: Area[]): Farm[] {
     const farms: Farm[] = [];
-    const farmCount = Math.min(this.farmNamesPool.length, 50); // Generate up to 50 farms
+    const farmCount = this.farmNamesPool.length; // Generate all available farms (60+)
     
     for (let i = 0; i < farmCount; i++) {
       const category = categories[Math.floor(Math.random() * categories.length)];

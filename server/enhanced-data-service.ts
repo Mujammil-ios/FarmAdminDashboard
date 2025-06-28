@@ -517,4 +517,652 @@ export class EnhancedDataService {
   getRandomOwnerName(): string {
     return this.ownerNamesPool[Math.floor(Math.random() * this.ownerNamesPool.length)];
   }
+
+  // Generate comprehensive booking data with detailed information
+  generateBookings(farms: Farm[], users: User[]): Booking[] {
+    const bookings: Booking[] = [];
+    const bookingCount = 150; // Generate 150+ detailed bookings
+    
+    const bookingStatuses = ['confirmed', 'pending', 'cancelled', 'completed', 'checked_in', 'checked_out'];
+    const paymentMethods = ['credit_card', 'debit_card', 'upi', 'net_banking', 'wallet', 'cash'];
+    const paymentStatuses = ['completed', 'pending', 'failed', 'refunded', 'partial'];
+    const specialRequests = [
+      'Early check-in requested',
+      'Late check-out needed',
+      'Vegetarian meals only',
+      'Anniversary celebration setup',
+      'Birthday party arrangements',
+      'Corporate team building activities',
+      'Pet-friendly accommodation',
+      'Wheelchair accessibility needed',
+      'Organic food preferences',
+      'Photography session planned',
+      'Yoga session arrangement',
+      'Bonfire evening setup'
+    ];
+
+    for (let i = 0; i < bookingCount; i++) {
+      const farm = farms[Math.floor(Math.random() * farms.length)];
+      const user = users.filter(u => u.role === 'customer')[Math.floor(Math.random() * users.filter(u => u.role === 'customer').length)];
+      const checkInDate = new Date(2025, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1);
+      const checkOutDate = new Date(checkInDate.getTime() + (1 + Math.floor(Math.random() * 5)) * 24 * 60 * 60 * 1000);
+      const slotType = Math.random() > 0.5 ? 'morning' : 'evening';
+      const guestCount = 1 + Math.floor(Math.random() * (farm.maxGuests || 10));
+      const pricePerSlot = slotType === 'morning' ? farm.morningSlotPrice : farm.eveningSlotPrice;
+      const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (24 * 60 * 60 * 1000));
+      const subtotal = (pricePerSlot || 5000) * nights;
+      const taxAmount = Math.round(subtotal * 0.18); // 18% GST
+      const discountAmount = Math.random() > 0.7 ? Math.round(subtotal * (0.05 + Math.random() * 0.15)) : 0;
+      const totalAmount = subtotal + taxAmount - discountAmount;
+
+      bookings.push({
+        id: i + 1,
+        userId: user?.id || 1,
+        farmId: farm.id,
+        checkInDate: checkInDate.toISOString().split('T')[0],
+        checkOutDate: checkOutDate.toISOString().split('T')[0],
+        slotType: slotType,
+        guestCount: guestCount,
+        totalAmount: totalAmount,
+        subtotal: subtotal,
+        taxAmount: taxAmount,
+        discountAmount: discountAmount,
+        advanceAmount: Math.round(totalAmount * (0.2 + Math.random() * 0.3)), // 20-50% advance
+        remainingAmount: Math.round(totalAmount * (0.5 + Math.random() * 0.3)),
+        status: bookingStatuses[Math.floor(Math.random() * bookingStatuses.length)] as any,
+        paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)] as any,
+        paymentStatus: paymentStatuses[Math.floor(Math.random() * paymentStatuses.length)] as any,
+        specialRequests: Math.random() > 0.6 ? specialRequests[Math.floor(Math.random() * specialRequests.length)] : null,
+        cancellationReason: Math.random() > 0.85 ? 'Emergency came up' : null,
+        customerNotes: Math.random() > 0.7 ? 'Looking forward to a peaceful stay with family' : null,
+        adminNotes: Math.random() > 0.8 ? 'VIP customer - provide extra care' : null,
+        confirmationCode: `BK${String(i + 1).padStart(6, '0')}`,
+        createdAt: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+        updatedAt: new Date()
+      });
+    }
+    
+    return bookings;
+  }
+
+  // Generate comprehensive transaction data with detailed payment information
+  generateTransactions(bookings: Booking[], farms: Farm[], users: User[]): Transaction[] {
+    const transactions: Transaction[] = [];
+    const transactionTypes = ['booking_payment', 'refund', 'cancellation_fee', 'additional_charges', 'security_deposit'];
+    const paymentGateways = ['razorpay', 'payu', 'ccavenue', 'stripe', 'phonepe', 'googlepay'];
+    const bankNames = ['HDFC Bank', 'ICICI Bank', 'SBI', 'Axis Bank', 'Kotak Bank', 'Yes Bank', 'IDFC Bank'];
+    
+    // Create transactions for each booking
+    bookings.forEach((booking, index) => {
+      const farm = farms.find(f => f.id === booking.farmId);
+      const user = users.find(u => u.id === booking.userId);
+      
+      // Primary booking payment
+      transactions.push({
+        id: (index * 3) + 1,
+        userId: booking.userId,
+        farmId: booking.farmId,
+        bookingId: booking.id,
+        amount: booking.totalAmount || 5000,
+        transactionType: 'booking_payment',
+        paymentMethod: booking.paymentMethod || 'credit_card',
+        paymentGateway: paymentGateways[Math.floor(Math.random() * paymentGateways.length)],
+        gatewayTransactionId: `TXN${String(Date.now() + index).slice(-10)}`,
+        gatewayResponse: '{"status":"success","message":"Payment completed successfully"}',
+        bankReference: `BANK${String(Date.now() + index).slice(-8)}`,
+        bankName: bankNames[Math.floor(Math.random() * bankNames.length)],
+        cardLast4: Math.random() > 0.5 ? String(Math.floor(Math.random() * 10000)).padStart(4, '0') : null,
+        upiId: booking.paymentMethod === 'upi' ? `${user?.name?.toLowerCase().replace(/\s+/g, '')}@paytm` : null,
+        status: booking.paymentStatus || 'completed',
+        processingFee: Math.round((booking.totalAmount || 5000) * 0.02), // 2% processing fee
+        gstAmount: Math.round((booking.totalAmount || 5000) * 0.18),
+        netAmount: Math.round((booking.totalAmount || 5000) * 0.98),
+        settlementDate: booking.status === 'completed' ? new Date(Date.now() + Math.random() * 7 * 24 * 60 * 60 * 1000) : null,
+        description: `Payment for booking at ${farm?.name} from ${booking.checkInDate} to ${booking.checkOutDate}`,
+        failureReason: booking.paymentStatus === 'failed' ? 'Insufficient funds' : null,
+        refundAmount: booking.paymentStatus === 'refunded' ? booking.totalAmount : null,
+        refundDate: booking.paymentStatus === 'refunded' ? new Date() : null,
+        createdAt: new Date(booking.createdAt || new Date()),
+        updatedAt: new Date()
+      });
+
+      // Additional charges (random)
+      if (Math.random() > 0.7) {
+        transactions.push({
+          id: (index * 3) + 2,
+          userId: booking.userId,
+          farmId: booking.farmId,
+          bookingId: booking.id,
+          amount: 500 + Math.floor(Math.random() * 2000),
+          transactionType: 'additional_charges',
+          paymentMethod: 'cash',
+          description: 'Additional services and amenities',
+          status: 'completed',
+          createdAt: new Date(booking.createdAt || new Date()),
+          updatedAt: new Date()
+        });
+      }
+
+      // Security deposit (for premium bookings)
+      if ((booking.totalAmount || 0) > 10000) {
+        transactions.push({
+          id: (index * 3) + 3,
+          userId: booking.userId,
+          farmId: booking.farmId,
+          bookingId: booking.id,
+          amount: 2000,
+          transactionType: 'security_deposit',
+          paymentMethod: booking.paymentMethod,
+          description: 'Refundable security deposit',
+          status: booking.status === 'completed' ? 'refunded' : 'held',
+          refundAmount: booking.status === 'completed' ? 2000 : null,
+          refundDate: booking.status === 'completed' ? new Date() : null,
+          createdAt: new Date(booking.createdAt || new Date()),
+          updatedAt: new Date()
+        });
+      }
+    });
+    
+    return transactions.filter(t => t.id); // Remove undefined transactions
+  }
+
+  // Generate comprehensive customer data with detailed profiles
+  generateDetailedCustomers(): any[] {
+    const customers: any[] = [];
+    const customerSegments = ['Premium', 'Gold', 'Silver', 'Bronze', 'New'];
+    const occupations = ['Software Engineer', 'Doctor', 'Business Owner', 'Teacher', 'Lawyer', 'Consultant', 'Manager', 'Architect', 'Designer', 'Entrepreneur'];
+    const cities = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Pune', 'Hyderabad', 'Kolkata', 'Ahmedabad', 'Jaipur', 'Surat'];
+    const interests = ['Nature Photography', 'Organic Farming', 'Adventure Sports', 'Wellness', 'Family Time', 'Corporate Retreats', 'Yoga', 'Meditation', 'Cycling', 'Trekking'];
+    
+    for (let i = 0; i < 80; i++) {
+      const name = this.customerNamesPool[i % this.customerNamesPool.length];
+      const segment = customerSegments[Math.floor(Math.random() * customerSegments.length)];
+      const joinDate = new Date(2023, Math.floor(Math.random() * 24), Math.floor(Math.random() * 28) + 1);
+      const totalBookings = Math.floor(Math.random() * 15) + 1;
+      const totalSpent = totalBookings * (3000 + Math.random() * 12000);
+      
+      customers.push({
+        id: i + 1,
+        firebaseId: `firebase-customer-${String(i + 1).padStart(3, '0')}`,
+        name: name,
+        email: `${name.toLowerCase().replace(/\s+/g, '.')}@email.com`,
+        phone: `+91${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+        alternatePhone: Math.random() > 0.6 ? `+91${Math.floor(Math.random() * 9000000000) + 1000000000}` : null,
+        dateOfBirth: new Date(1970 + Math.floor(Math.random() * 35), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+        gender: Math.random() > 0.5 ? 'Male' : 'Female',
+        occupation: occupations[Math.floor(Math.random() * occupations.length)],
+        annualIncome: (3 + Math.floor(Math.random() * 20)) * 100000, // 3-25 lakhs
+        address: {
+          street: `${Math.floor(Math.random() * 500) + 1}, ${name.split(' ')[0]} Street`,
+          city: cities[Math.floor(Math.random() * cities.length)],
+          state: 'Maharashtra',
+          pincode: String(400000 + Math.floor(Math.random() * 99999)),
+          country: 'India'
+        },
+        emergencyContact: {
+          name: this.customerNamesPool[Math.floor(Math.random() * this.customerNamesPool.length)],
+          relation: Math.random() > 0.5 ? 'Spouse' : 'Parent',
+          phone: `+91${Math.floor(Math.random() * 9000000000) + 1000000000}`
+        },
+        preferences: {
+          foodType: Math.random() > 0.3 ? 'Vegetarian' : 'Non-Vegetarian',
+          roomType: Math.random() > 0.7 ? 'Premium' : 'Standard',
+          interests: interests.slice(0, 2 + Math.floor(Math.random() * 3)),
+          notifications: {
+            email: Math.random() > 0.2,
+            sms: Math.random() > 0.3,
+            whatsapp: Math.random() > 0.1
+          }
+        },
+        loyaltyProgram: {
+          segment: segment,
+          points: Math.floor(totalSpent / 100),
+          tier: segment,
+          nextTierPoints: segment === 'Premium' ? 0 : 1000 - (Math.floor(totalSpent / 100) % 1000),
+          benefits: segment === 'Premium' ? ['Priority Booking', 'Free Cancellation', '20% Discount'] : ['Standard Booking']
+        },
+        bookingHistory: {
+          totalBookings: totalBookings,
+          completedBookings: Math.floor(totalBookings * 0.85),
+          cancelledBookings: Math.floor(totalBookings * 0.1),
+          noShowBookings: Math.floor(totalBookings * 0.05),
+          totalSpent: Math.round(totalSpent),
+          averageBookingValue: Math.round(totalSpent / totalBookings),
+          lastBookingDate: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000),
+          favoriteProperties: [1, 3, 5].slice(0, Math.floor(Math.random() * 3) + 1)
+        },
+        paymentInfo: {
+          preferredMethod: ['credit_card', 'debit_card', 'upi', 'net_banking'][Math.floor(Math.random() * 4)],
+          savedCards: Math.floor(Math.random() * 3),
+          defaultUpiId: `${name.toLowerCase().replace(/\s+/g, '')}@paytm`,
+          creditScore: 650 + Math.floor(Math.random() * 200)
+        },
+        communication: {
+          preferredLanguage: Math.random() > 0.7 ? 'Hindi' : 'English',
+          lastContactDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+          supportTickets: Math.floor(Math.random() * 5),
+          feedbackRating: 3.5 + Math.random() * 1.5
+        },
+        verification: {
+          emailVerified: Math.random() > 0.05,
+          phoneVerified: Math.random() > 0.02,
+          kycStatus: Math.random() > 0.3 ? 'verified' : 'pending',
+          documentType: 'Aadhar Card',
+          documentNumber: `****-****-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`
+        },
+        status: Math.random() > 0.02 ? 'active' : 'inactive',
+        registrationDate: joinDate,
+        lastLoginDate: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+        referralCode: `REF${String(i + 1).padStart(6, '0')}`,
+        referredBy: Math.random() > 0.8 ? `REF${String(Math.floor(Math.random() * i) + 1).padStart(6, '0')}` : null,
+        createdAt: joinDate,
+        updatedAt: new Date()
+      });
+    }
+    
+    return customers;
+  }
+
+  // Generate comprehensive farm owner data
+  generateDetailedOwners(): any[] {
+    const owners: any[] = [];
+    const businessTypes = ['Individual', 'Partnership', 'Private Limited', 'LLP', 'Sole Proprietorship'];
+    const bankNames = ['HDFC Bank', 'ICICI Bank', 'SBI', 'Axis Bank', 'Kotak Bank', 'Yes Bank'];
+    
+    for (let i = 0; i < 25; i++) {
+      const name = this.ownerNamesPool[i % this.ownerNamesPool.length];
+      const businessName = `${name.split(' ')[0]} Farms & Resorts`;
+      const joinDate = new Date(2022, Math.floor(Math.random() * 24), Math.floor(Math.random() * 28) + 1);
+      const totalEarnings = 50000 + Math.random() * 500000;
+      
+      owners.push({
+        id: i + 1,
+        firebaseId: `firebase-owner-${String(i + 1).padStart(3, '0')}`,
+        personalInfo: {
+          name: name,
+          email: `${name.toLowerCase().replace(/\s+/g, '.')}@business.com`,
+          phone: `+91${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+          alternatePhone: `+91${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+          dateOfBirth: new Date(1960 + Math.floor(Math.random() * 30), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+          gender: Math.random() > 0.7 ? 'Female' : 'Male',
+          address: {
+            street: `${Math.floor(Math.random() * 200) + 1}, Farm Road`,
+            city: this.citiesData[Math.floor(Math.random() * this.citiesData.length)].name,
+            state: this.citiesData[Math.floor(Math.random() * this.citiesData.length)].state,
+            pincode: String(400000 + Math.floor(Math.random() * 99999)),
+            country: 'India'
+          }
+        },
+        businessInfo: {
+          businessName: businessName,
+          businessType: businessTypes[Math.floor(Math.random() * businessTypes.length)],
+          gstNumber: `27ABCDE${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}F1Z5`,
+          panNumber: `ABCDE${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}F`,
+          businessAddress: {
+            street: `Plot ${Math.floor(Math.random() * 100) + 1}, Industrial Area`,
+            city: this.citiesData[Math.floor(Math.random() * this.citiesData.length)].name,
+            state: this.citiesData[Math.floor(Math.random() * this.citiesData.length)].state,
+            pincode: String(400000 + Math.floor(Math.random() * 99999)),
+            country: 'India'
+          },
+          yearEstablished: 2015 + Math.floor(Math.random() * 8),
+          totalProperties: 1 + Math.floor(Math.random() * 5),
+          businessLicense: `BL${String(Math.floor(Math.random() * 100000)).padStart(5, '0')}`
+        },
+        bankDetails: {
+          accountHolderName: name,
+          bankName: bankNames[Math.floor(Math.random() * bankNames.length)],
+          accountNumber: `****${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+          ifscCode: `HDFC0${String(Math.floor(Math.random() * 10000)).padStart(6, '0')}`,
+          branchName: `${this.citiesData[Math.floor(Math.random() * this.citiesData.length)].name} Branch`,
+          accountType: Math.random() > 0.5 ? 'Current' : 'Savings',
+          verified: Math.random() > 0.1
+        },
+        financialInfo: {
+          totalEarnings: Math.round(totalEarnings),
+          totalBookings: Math.floor(totalEarnings / 5000),
+          averageRating: 3.5 + Math.random() * 1.5,
+          commissionRate: 15 + Math.floor(Math.random() * 10), // 15-25%
+          pendingPayouts: Math.round(totalEarnings * 0.1),
+          lastPayoutDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+          nextPayoutDate: new Date(Date.now() + (7 - new Date().getDay()) * 24 * 60 * 60 * 1000),
+          taxDeducted: Math.round(totalEarnings * 0.05), // 5% TDS
+          monthlyEarnings: Array.from({length: 12}, (_, i) => ({
+            month: i + 1,
+            earnings: Math.round(totalEarnings / 12 + (Math.random() - 0.5) * totalEarnings * 0.3),
+            bookings: Math.floor(Math.random() * 20) + 5
+          }))
+        },
+        properties: Array.from({length: 1 + Math.floor(Math.random() * 3)}, (_, j) => ({
+          id: (i * 3) + j + 1,
+          name: this.farmNamesPool[(i * 3) + j % this.farmNamesPool.length],
+          status: Math.random() > 0.1 ? 'active' : 'inactive',
+          averageRating: 3.5 + Math.random() * 1.5,
+          totalBookings: Math.floor(Math.random() * 50) + 10,
+          monthlyRevenue: Math.round(totalEarnings / 3)
+        })),
+        kycInfo: {
+          status: Math.random() > 0.2 ? 'verified' : 'pending',
+          documentsSubmitted: {
+            aadharCard: Math.random() > 0.05,
+            panCard: Math.random() > 0.05,
+            bankPassbook: Math.random() > 0.1,
+            businessLicense: Math.random() > 0.2,
+            gstCertificate: Math.random() > 0.3
+          },
+          verificationDate: Math.random() > 0.2 ? new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000) : null,
+          rejectionReason: Math.random() > 0.9 ? 'Document quality not clear' : null
+        },
+        communication: {
+          preferredLanguage: Math.random() > 0.6 ? 'Hindi' : 'English',
+          whatsappEnabled: Math.random() > 0.2,
+          emailEnabled: Math.random() > 0.1,
+          smsEnabled: Math.random() > 0.3,
+          lastContactDate: new Date(Date.now() - Math.random() * 15 * 24 * 60 * 60 * 1000),
+          supportTickets: Math.floor(Math.random() * 3),
+          responseTime: Math.floor(Math.random() * 120) + 30 // 30-150 minutes
+        },
+        performance: {
+          rating: 3.5 + Math.random() * 1.5,
+          totalReviews: Math.floor(Math.random() * 100) + 20,
+          responseRate: Math.floor(Math.random() * 30) + 70, // 70-100%
+          cancellationRate: Math.floor(Math.random() * 5) + 1, // 1-5%
+          onTimeCheckIn: Math.floor(Math.random() * 20) + 80, // 80-100%
+          qualityScore: Math.floor(Math.random() * 20) + 80, // 80-100%
+          repeatCustomerRate: Math.floor(Math.random() * 40) + 20 // 20-60%
+        },
+        status: Math.random() > 0.02 ? 'active' : 'suspended',
+        registrationDate: joinDate,
+        lastLoginDate: new Date(Date.now() - Math.random() * 3 * 24 * 60 * 60 * 1000),
+        contractSigned: Math.random() > 0.05,
+        contractExpiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        createdAt: joinDate,
+        updatedAt: new Date()
+      });
+    }
+    
+    return owners;
+  }
+
+  // Generate comprehensive review data
+  generateDetailedReviews(farms: Farm[], users: User[]): any[] {
+    const reviews: any[] = [];
+    const reviewCount = 200; // Generate 200+ detailed reviews
+    
+    const reviewCategories = ['Overall Experience', 'Cleanliness', 'Food Quality', 'Staff Behavior', 'Value for Money', 'Amenities'];
+    const positiveComments = [
+      'Amazing experience! Everything was perfect.',
+      'Beautiful property with excellent facilities.',
+      'Staff was very helpful and friendly.',
+      'Food quality was outstanding.',
+      'Perfect place for family vacation.',
+      'Great value for money.',
+      'Clean and well-maintained facilities.',
+      'Peaceful environment, exactly what we needed.',
+      'Kids loved the activities.',
+      'Will definitely visit again.'
+    ];
+    
+    const negativeComments = [
+      'Room could have been cleaner.',
+      'Food options were limited.',
+      'Staff response was slow.',
+      'Wi-Fi connectivity issues.',
+      'Overpriced for the facilities provided.',
+      'Maintenance needed for some amenities.',
+      'Parking space was insufficient.',
+      'Check-in process took too long.'
+    ];
+    
+    for (let i = 0; i < reviewCount; i++) {
+      const farm = farms[Math.floor(Math.random() * farms.length)];
+      const user = users.filter(u => u.role === 'customer')[Math.floor(Math.random() * users.filter(u => u.role === 'customer').length)];
+      const rating = Math.floor(Math.random() * 5) + 1;
+      const isPositive = rating >= 4;
+      
+      reviews.push({
+        id: i + 1,
+        userId: user?.id || 1,
+        farmId: farm.id,
+        bookingId: Math.floor(Math.random() * 150) + 1,
+        rating: rating,
+        comment: isPositive ? 
+          positiveComments[Math.floor(Math.random() * positiveComments.length)] :
+          negativeComments[Math.floor(Math.random() * negativeComments.length)],
+        categories: {
+          cleanliness: Math.floor(Math.random() * 5) + 1,
+          foodQuality: Math.floor(Math.random() * 5) + 1,
+          staffBehavior: Math.floor(Math.random() * 5) + 1,
+          valueForMoney: Math.floor(Math.random() * 5) + 1,
+          amenities: Math.floor(Math.random() * 5) + 1
+        },
+        photos: Math.random() > 0.7 ? [
+          'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=300',
+          'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300'
+        ] : [],
+        helpfulVotes: Math.floor(Math.random() * 20),
+        reportedCount: Math.random() > 0.95 ? Math.floor(Math.random() * 3) : 0,
+        reviewType: Math.random() > 0.8 ? 'verified_stay' : 'general',
+        stayDuration: Math.floor(Math.random() * 5) + 1,
+        travelType: ['Solo', 'Couple', 'Family', 'Business', 'Friends'][Math.floor(Math.random() * 5)],
+        isVisible: Math.random() > 0.02, // 98% visible
+        adminResponse: Math.random() > 0.8 ? 'Thank you for your feedback. We appreciate your visit!' : null,
+        adminResponseDate: Math.random() > 0.8 ? new Date() : null,
+        createdAt: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+        updatedAt: new Date()
+      });
+    }
+    
+    return reviews;
+  }
+
+  // Generate comprehensive sub-property data
+  generateDetailedSubProperties(farms: Farm[]): any[] {
+    const subProperties: any[] = [];
+    const roomTypes = ['Deluxe Room', 'Premium Villa', 'Standard Cottage', 'Luxury Suite', 'Family Room', 'Dormitory', 'Treehouse', 'Tent'];
+    const amenityFeatures = ['AC', 'Heater', 'Wi-Fi', 'TV', 'Mini Fridge', 'Balcony', 'Garden View', 'Private Bathroom'];
+    
+    farms.forEach((farm, farmIndex) => {
+      const subPropertyCount = 2 + Math.floor(Math.random() * 4); // 2-5 sub-properties per farm
+      
+      for (let i = 0; i < subPropertyCount; i++) {
+        const roomType = roomTypes[Math.floor(Math.random() * roomTypes.length)];
+        const maxGuests = 2 + Math.floor(Math.random() * 8);
+        const basePrice = 1000 + Math.random() * 4000;
+        
+        subProperties.push({
+          id: (farmIndex * 5) + i + 1,
+          farmId: farm.id,
+          name: `${roomType} ${i + 1}`,
+          type: roomType,
+          description: `Comfortable ${roomType.toLowerCase()} with modern amenities and beautiful views.`,
+          maxGuests: maxGuests,
+          bedrooms: Math.floor(maxGuests / 2) || 1,
+          bathrooms: Math.floor(maxGuests / 3) || 1,
+          amenities: amenityFeatures.slice(0, 3 + Math.floor(Math.random() * 5)),
+          pricing: {
+            basePrice: Math.round(basePrice),
+            weekendSurcharge: Math.round(basePrice * 0.2),
+            holidaySurcharge: Math.round(basePrice * 0.5),
+            cleaningFee: Math.round(basePrice * 0.1),
+            securityDeposit: Math.round(basePrice * 0.5)
+          },
+          area: `${200 + Math.floor(Math.random() * 500)} sq ft`,
+          floor: Math.floor(Math.random() * 3) + 1,
+          images: [
+            'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400',
+            'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400',
+            'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400'
+          ],
+          features: {
+            hasAC: Math.random() > 0.3,
+            hasWiFi: Math.random() > 0.1,
+            hasTV: Math.random() > 0.4,
+            hasKitchen: Math.random() > 0.6,
+            hasBalcony: Math.random() > 0.5,
+            petFriendly: Math.random() > 0.7,
+            smokingAllowed: Math.random() > 0.9
+          },
+          availability: {
+            isActive: Math.random() > 0.1, // 90% active
+            minimumStay: Math.floor(Math.random() * 3) + 1,
+            maximumStay: 7 + Math.floor(Math.random() * 8),
+            advanceBookingDays: 30 + Math.floor(Math.random() * 60),
+            checkInTime: '14:00',
+            checkOutTime: '11:00'
+          },
+          bookingStats: {
+            totalBookings: Math.floor(Math.random() * 50),
+            averageRating: 3.5 + Math.random() * 1.5,
+            occupancyRate: Math.floor(Math.random() * 40) + 60, // 60-100%
+            lastBookedDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
+          },
+          isActive: Math.random() > 0.05, // 95% active
+          createdAt: new Date(2023, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+          updatedAt: new Date()
+        });
+      }
+    });
+    
+    return subProperties;
+  }
+
+  // Generate comprehensive reels data
+  generateDetailedReels(farms: Farm[]): any[] {
+    const reels: any[] = [];
+    const reelTitles = [
+      'Morning Sunrise at the Farm',
+      'Fresh Organic Harvest',
+      'Farm to Table Experience',
+      'Peaceful Evening Vibes',
+      'Kids Having Fun',
+      'Farm Animals Up Close',
+      'Traditional Farming Methods',
+      'Cooking with Fresh Ingredients',
+      'Nature Walk Tour',
+      'Sunset Photography'
+    ];
+    
+    const reelDescriptions = [
+      'Witness the breathtaking sunrise over our organic fields',
+      'From farm to your plate - fresh and healthy',
+      'Experience authentic farm life',
+      'Relax and unwind in nature\'s embrace',
+      'Creating memories that last a lifetime',
+      'Meet our friendly farm animals',
+      'Preserving traditional farming practices',
+      'Taste the difference of fresh ingredients',
+      'Explore the beauty of rural landscape',
+      'Capture the perfect golden hour moments'
+    ];
+    
+    for (let i = 0; i < 50; i++) {
+      const farm = farms[Math.floor(Math.random() * farms.length)];
+      const titleIndex = Math.floor(Math.random() * reelTitles.length);
+      
+      reels.push({
+        id: i + 1,
+        farmId: farm.id,
+        title: reelTitles[titleIndex],
+        description: reelDescriptions[titleIndex],
+        videoUrl: `https://videos.unsplash.com/video-${i + 1}.mp4`,
+        thumbnailUrl: `https://images.unsplash.com/photo-${1542314831068 + i}?w=400`,
+        duration: 15 + Math.floor(Math.random() * 45), // 15-60 seconds
+        category: ['Nature', 'Food', 'Activities', 'Animals', 'Lifestyle'][Math.floor(Math.random() * 5)],
+        tags: ['farm', 'organic', 'nature', 'fresh', 'peaceful'].slice(0, 3 + Math.floor(Math.random() * 3)),
+        engagement: {
+          views: Math.floor(Math.random() * 10000) + 500,
+          likes: Math.floor(Math.random() * 500) + 50,
+          shares: Math.floor(Math.random() * 100) + 10,
+          comments: Math.floor(Math.random() * 50) + 5
+        },
+        uploadDate: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+        isActive: Math.random() > 0.05, // 95% active
+        isFeatured: Math.random() > 0.8, // 20% featured
+        displayOrder: i + 1,
+        createdAt: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+        updatedAt: new Date()
+      });
+    }
+    
+    return reels.sort((a, b) => a.displayOrder - b.displayOrder);
+  }
+
+  // Generate comprehensive requested farms data
+  generateDetailedRequestedFarms(users: User[]): any[] {
+    const requestedFarms: any[] = [];
+    const farmTypes = ['Organic Farm', 'Dairy Farm', 'Poultry Farm', 'Fruit Orchard', 'Vegetable Farm', 'Herb Garden', 'Flower Farm', 'Fish Farm'];
+    const statuses = ['pending', 'under_review', 'approved', 'rejected', 'requires_documents'];
+    
+    for (let i = 0; i < 25; i++) {
+      const owner = users.filter(u => u.role === 'owner')[Math.floor(Math.random() * users.filter(u => u.role === 'owner').length)];
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      const farmType = farmTypes[Math.floor(Math.random() * farmTypes.length)];
+      
+      requestedFarms.push({
+        id: i + 1,
+        userId: owner?.id || 1,
+        ownerName: owner?.name || 'Unknown Owner',
+        ownerPhone: `+91${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+        ownerEmail: owner?.email || 'owner@email.com',
+        farmDetails: {
+          name: `${this.farmNamesPool[i % this.farmNamesPool.length]} ${farmType}`,
+          type: farmType,
+          description: `A beautiful ${farmType.toLowerCase()} with modern facilities and traditional farming practices.`,
+          totalArea: `${5 + Math.floor(Math.random() * 45)} acres`,
+          cultivatedArea: `${3 + Math.floor(Math.random() * 25)} acres`,
+          establishedYear: 2010 + Math.floor(Math.random() * 15),
+          certifications: Math.random() > 0.5 ? ['Organic Certified', 'FSSAI Approved'] : ['Under Process']
+        },
+        location: {
+          address: `Plot ${Math.floor(Math.random() * 500) + 1}, Farm Road`,
+          city: this.citiesData[Math.floor(Math.random() * this.citiesData.length)].name,
+          state: this.citiesData[Math.floor(Math.random() * this.citiesData.length)].state,
+          pincode: String(400000 + Math.floor(Math.random() * 99999)),
+          coordinates: {
+            latitude: 18.5 + Math.random() * 10,
+            longitude: 72.8 + Math.random() * 10
+          }
+        },
+        facilities: {
+          accommodation: Math.random() > 0.3,
+          restaurant: Math.random() > 0.6,
+          parking: Math.random() > 0.2,
+          wifi: Math.random() > 0.4,
+          electricityBackup: Math.random() > 0.5,
+          firstAid: Math.random() > 0.7,
+          guidedTours: Math.random() > 0.3,
+          playArea: Math.random() > 0.6
+        },
+        pricing: {
+          proposedDayRate: Math.round(2000 + Math.random() * 8000),
+          seasonalVariation: Math.random() > 0.5,
+          groupDiscounts: Math.random() > 0.6,
+          corporateRates: Math.random() > 0.7
+        },
+        documents: {
+          landOwnershipProof: Math.random() > 0.1,
+          businessLicense: Math.random() > 0.2,
+          taxDocuments: Math.random() > 0.3,
+          farmCertificates: Math.random() > 0.5,
+          insurancePolicy: Math.random() > 0.6,
+          bankDetails: Math.random() > 0.1
+        },
+        status: status,
+        applicationDate: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+        reviewDate: status !== 'pending' ? new Date() : null,
+        reviewedBy: status !== 'pending' ? 'Admin Team' : null,
+        approvalDate: status === 'approved' ? new Date() : null,
+        rejectionReason: status === 'rejected' ? 'Incomplete documentation' : null,
+        requiredActions: status === 'requires_documents' ? ['Submit land ownership proof', 'Provide business license'] : [],
+        estimatedProcessingTime: '7-14 business days',
+        priority: Math.random() > 0.8 ? 'high' : 'normal',
+        notes: 'Application under review by our verification team.',
+        createdAt: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+        updatedAt: new Date()
+      });
+    }
+    
+    return requestedFarms;
+  }
 }

@@ -223,91 +223,11 @@ export class MemoryStorage implements IStorage {
       }
     ];
 
-    // Initialize Bookings
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const nextWeek = new Date(today);
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    
-    this.bookings = [
-      {
-        id: 1,
-        userId: 2,
-        farmId: 1,
-        checkInDate: tomorrow.toISOString().split('T')[0],
-        checkOutDate: tomorrow.toISOString().split('T')[0],
-        numberOfSlots: 2,
-        totalAmount: 5000,
-        status: 1,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 2,
-        userId: 4,
-        farmId: 2,
-        checkInDate: nextWeek.toISOString().split('T')[0],
-        checkOutDate: nextWeek.toISOString().split('T')[0],
-        numberOfSlots: 1,
-        totalAmount: 3000,
-        status: 1,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 3,
-        userId: 6,
-        farmId: 3,
-        checkInDate: today.toISOString().split('T')[0],
-        checkOutDate: today.toISOString().split('T')[0],
-        numberOfSlots: 1,
-        totalAmount: 2800,
-        status: 1,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
+    // Initialize comprehensive bookings with detailed information (150+ bookings)
+    this.bookings = this.enhancedDataService.generateBookings(this.farms, this.users);
 
-    // Initialize Transactions
-    this.transactions = [
-      {
-        id: 1,
-        userId: 2,
-        farmId: 1,
-        bookingId: 1,
-        amount: 5000,
-        paymentMethod: "Credit Card",
-        status: "Complete",
-        transactionId: "TXN001",
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 2,
-        userId: 4,
-        farmId: 2,
-        bookingId: 2,
-        amount: 3000,
-        paymentMethod: "UPI",
-        status: "Complete",
-        transactionId: "TXN002",
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 3,
-        userId: 6,
-        farmId: 3,
-        bookingId: 3,
-        amount: 2800,
-        paymentMethod: "Net Banking",
-        status: "Pending",
-        transactionId: "TXN003",
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
+    // Initialize comprehensive transactions with detailed payment information (300+ transactions)
+    this.transactions = this.enhancedDataService.generateTransactions(this.bookings, this.farms, this.users);
 
     // Initialize Requested Farms
     this.requestedFarms = [

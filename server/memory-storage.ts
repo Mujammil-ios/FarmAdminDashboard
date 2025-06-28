@@ -67,6 +67,11 @@ export class MemoryStorage implements IStorage {
     this.initializeData();
   }
 
+  // Public method to access enhanced data service
+  getEnhancedDataService(): EnhancedDataService {
+    return this.enhancedDataService;
+  }
+
   private initializeData() {
     // Initialize comprehensive cities data
     const citiesData = [
@@ -229,79 +234,11 @@ export class MemoryStorage implements IStorage {
     // Initialize comprehensive transactions with detailed payment information (300+ transactions)
     this.transactions = this.enhancedDataService.generateTransactions(this.bookings, this.farms, this.users);
 
-    // Initialize Requested Farms
-    this.requestedFarms = [
-      {
-        id: 1,
-        userId: 3,
-        name: "Mountain View Herb Farm",
-        description: "Medicinal herb farm in the hills with therapeutic gardens",
-        cityId: 2,
-        areaId: 5,
-        address: "789 Mountain Road, Karol Bagh, Delhi",
-        phone: "+919876543220",
-        status: "pending",
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 2,
-        userId: 5,
-        name: "Coastal Coconut Plantation",
-        description: "Traditional coconut plantation with coastal views",
-        cityId: 5,
-        areaId: 1,
-        address: "Beach Road, ECR, Chennai",
-        phone: "+919876543221",
-        status: "approved",
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
+    // Initialize comprehensive requested farms with detailed application data (25+ applications)
+    this.requestedFarms = this.enhancedDataService.generateDetailedRequestedFarms(this.users);
 
-    // Initialize Reviews
-    this.reviews = [
-      {
-        id: 1,
-        userId: 2,
-        farmId: 1,
-        rating: 5,
-        comment: "Amazing experience! The organic farm is beautiful and well-maintained. Learned so much about sustainable farming practices.",
-        isVisible: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 2,
-        userId: 4,
-        farmId: 2,
-        rating: 4,
-        comment: "Great dairy farm experience. Kids loved interacting with the cows. Fresh milk and cheese were delicious!",
-        isVisible: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 3,
-        userId: 6,
-        farmId: 3,
-        rating: 5,
-        comment: "Mango picking was so much fun! Variety of mangoes was impressive. Perfect family outing.",
-        isVisible: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 4,
-        userId: 8,
-        farmId: 4,
-        rating: 4,
-        comment: "Fascinating to see hydroponic farming in action. Very educational and informative tour.",
-        isVisible: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
+    // Initialize comprehensive reviews with detailed ratings and feedback (200+ reviews)
+    this.reviews = this.enhancedDataService.generateDetailedReviews(this.farms, this.users);
 
     // Initialize FAQs
     this.faqs = [
@@ -359,107 +296,8 @@ export class MemoryStorage implements IStorage {
       }
     ];
 
-    // Initialize Sub-Properties with comprehensive data
-    this.subProperties = [
-      {
-        id: 1,
-        farmId: 1,
-        name: "Luxury Villa A",
-        description: "Premium villa with mountain view, private pool, and modern amenities. Perfect for couples and small families.",
-        type: "villa",
-        capacity: 4,
-        pricePerSlot: 5500,
-        amenities: [1, 2, 4, 5, 7, 8],
-        images: ["https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=500", "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=500"],
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 2,
-        farmId: 1,
-        name: "Cozy Cottage B",
-        description: "Rustic cottage surrounded by organic gardens. Experience farm life with modern comfort and traditional charm.",
-        type: "cottage",
-        capacity: 6,
-        pricePerSlot: 3800,
-        amenities: [1, 2, 5, 6, 7],
-        images: ["https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500", "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=500"],
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 3,
-        farmId: 2,
-        name: "Resort Apartment 1",
-        description: "Modern apartment in the heart of dairy farm. Wake up to fresh milk and cheese every morning.",
-        type: "apartment",
-        capacity: 3,
-        pricePerSlot: 4200,
-        amenities: [1, 2, 3, 5, 7],
-        images: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500"],
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 4,
-        farmId: 2,
-        name: "Family Suite 2",
-        description: "Spacious family suite with kitchenette and living area. Perfect for extended farm stays.",
-        type: "suite",
-        capacity: 8,
-        pricePerSlot: 6000,
-        amenities: [1, 2, 4, 5, 6, 7, 8],
-        images: ["https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=500"],
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 5,
-        farmId: 3,
-        name: "Heritage Bungalow",
-        description: "Traditional bungalow with ethnic decor and authentic rural experience. Connect with nature and tradition.",
-        type: "bungalow",
-        capacity: 5,
-        pricePerSlot: 4800,
-        amenities: [1, 2, 5, 6, 7],
-        images: ["https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500"],
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 6,
-        farmId: 4,
-        name: "Urban Loft",
-        description: "Modern loft apartment in urban farm setting. Experience city farming with style and comfort.",
-        type: "loft",
-        capacity: 2,
-        pricePerSlot: 4500,
-        amenities: [1, 2, 4, 5, 7],
-        images: ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500"],
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 7,
-        farmId: 5,
-        name: "Poultry Farm Cabin",
-        description: "Charming cabin overlooking free-range poultry areas. Perfect for nature lovers and bird watchers.",
-        type: "cabin",
-        capacity: 4,
-        pricePerSlot: 3200,
-        amenities: [1, 2, 5, 6, 7],
-        images: ["https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500"],
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
+    // Initialize comprehensive sub-properties with detailed room data (200+ sub-properties)
+    this.subProperties = this.enhancedDataService.generateDetailedSubProperties(this.farms);
 
     // Initialize Banners with comprehensive data
     this.banners = [
@@ -578,93 +416,8 @@ export class MemoryStorage implements IStorage {
       { id: 9, sectionId: 4, farmId: 4, createdAt: new Date(), updatedAt: new Date() }
     ];
 
-    // Initialize Reels with comprehensive data
-    this.reels = [
-      {
-        id: 1,
-        farmId: 1,
-        title: "Morning at Green Valley",
-        description: "Experience the serenity of early morning farm activities. Fresh air, bird songs, and organic breakfast!",
-        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-        thumbnailUrl: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400",
-        duration: 45,
-        farmAlias: "Green Paradise",
-        displayOrder: 1,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 2,
-        farmId: 2,
-        title: "Fresh Milk Collection",
-        description: "Watch our daily milk collection process. From cow to table - the purest dairy experience.",
-        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
-        thumbnailUrl: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400",
-        duration: 60,
-        farmAlias: "Dairy Delight",
-        displayOrder: 2,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 3,
-        farmId: 3,
-        title: "Village Life Experience",
-        description: "Immerse yourself in authentic village culture. Traditional cooking, folk music, and rural crafts.",
-        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-        thumbnailUrl: "https://images.unsplash.com/photo-1628191081676-73e4a2b2ae73?w=400",
-        duration: 90,
-        farmAlias: "Heritage Village",
-        displayOrder: 3,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 4,
-        farmId: 4,
-        title: "Urban Farming Innovation",
-        description: "Discover the future of farming in the city. Hydroponic systems and sustainable urban agriculture.",
-        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
-        thumbnailUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400",
-        duration: 75,
-        farmAlias: "City Farm Hub",
-        displayOrder: 4,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 5,
-        farmId: 5,
-        title: "Farm to Table Dining",
-        description: "Experience fresh ingredients transformed into delicious meals. From garden to plate in minutes.",
-        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-        thumbnailUrl: "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=400",
-        duration: 50,
-        farmAlias: "Farm Kitchen",
-        displayOrder: 5,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 6,
-        farmId: 1,
-        title: "Kids Farm Adventure",
-        description: "Children's favorite activities - animal feeding, treasure hunts, and nature exploration.",
-        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
-        thumbnailUrl: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400",
-        duration: 65,
-        farmAlias: "Adventure Farm",
-        displayOrder: 6,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
+    // Initialize comprehensive reels with detailed video content (50+ reels)
+    this.reels = this.enhancedDataService.generateDetailedReels(this.farms);
 
     this.nextId = 1000;
   }

@@ -33,7 +33,7 @@ export default function FeaturedSections() {
   });
 
   const { data: sectionFarms = [] } = useQuery({
-    queryKey: ["/api/featured-sections", selectedSection, "farms"],
+    queryKey: [`/api/featured-sections/${selectedSection}/farms`],
     enabled: !!selectedSection,
   });
 
@@ -95,6 +95,7 @@ export default function FeaturedSections() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/featured-sections"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/featured-sections/${selectedSection}/farms`] });
       toast({ title: "Farms added to section successfully" });
     },
   });
@@ -108,6 +109,7 @@ export default function FeaturedSections() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/featured-sections"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/featured-sections/${selectedSection}/farms`] });
       toast({ title: "Farm removed from section" });
     },
   });

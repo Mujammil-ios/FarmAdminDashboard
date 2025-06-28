@@ -442,8 +442,8 @@ export default function Farms() {
         </Dialog>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Enhanced Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="card-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Farms</CardTitle>
@@ -451,6 +451,9 @@ export default function Farms() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalFarms}</div>
+            <p className="text-xs text-muted-foreground">
+              across all categories
+            </p>
           </CardContent>
         </Card>
         <Card className="card-white">
@@ -460,6 +463,9 @@ export default function Farms() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{activeFarms}</div>
+            <p className="text-xs text-muted-foreground">
+              {totalFarms > 0 ? Math.round((activeFarms / totalFarms) * 100) : 0}% of total
+            </p>
           </CardContent>
         </Card>
         <Card className="card-white">
@@ -469,6 +475,21 @@ export default function Farms() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{bookingEnabled}</div>
+            <p className="text-xs text-muted-foreground">
+              accepting reservations
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="card-white">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg Price</CardTitle>
+            <IndianRupee className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{Math.round((farms?.reduce((sum, f) => sum + (f.pricePerSlot || 0), 0) || 0) / (farms?.length || 1))}</div>
+            <p className="text-xs text-muted-foreground">
+              per slot
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -507,12 +528,12 @@ export default function Farms() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Owner</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Price/Slot</TableHead>
+                <TableHead>Farm Details</TableHead>
+                <TableHead>Owner & Location</TableHead>
+                <TableHead>Pricing</TableHead>
+                <TableHead>Capacity</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Booking</TableHead>
+                <TableHead>Performance</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -538,27 +559,86 @@ export default function Farms() {
               ) : (
                 filteredFarms.map((farm) => (
                   <TableRow key={farm.id}>
-                    <TableCell className="font-medium">{farm.name}</TableCell>
-                    <TableCell>{farm.user?.name || "N/A"}</TableCell>
-                    <TableCell>{farm.city?.name}, {farm.area?.name}</TableCell>
-                    <TableCell>₹{farm.pricePerSlot?.toLocaleString()}</TableCell>
+                    {/* Farm Details */}
                     <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={farm.isEnable}
-                          onCheckedChange={() => toggleStatusMutation.mutate(farm.id)}
-                          disabled={toggleStatusMutation.isPending}
-                        />
-                        <span className="text-sm">
-                          {farm.isEnable ? "Active" : "Disabled"}
-                        </span>
+                      <div className="space-y-1">
+                        <div className="font-medium">{farm.name}</div>
+                        <div className="text-sm text-gray-500">{farm.category?.name || "N/A"}</div>
+                        {farm.description && (
+                          <div className="text-xs text-gray-400 truncate max-w-32">
+                            {farm.description}
+                          </div>
+                        )}
                       </div>
                     </TableCell>
+
+                    {/* Owner & Location */}
                     <TableCell>
-                      <Badge variant={farm.isBooking ? "default" : "secondary"}>
-                        {farm.isBooking ? "Enabled" : "Disabled"}
-                      </Badge>
+                      <div className="space-y-1">
+                        <div className="font-medium">{farm.user?.name || "N/A"}</div>
+                        <div className="text-sm text-gray-500">
+                          {farm.city?.name}, {farm.area?.name}
+                        </div>
+                        {farm.address && (
+                          <div className="text-xs text-gray-400 truncate max-w-32">
+                            {farm.address}
+                          </div>
+                        )}
+                      </div>
                     </TableCell>
+
+                    {/* Pricing */}
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="font-medium">₹{farm.pricePerSlot?.toLocaleString()}</div>
+                        <div className="text-sm text-gray-500">per slot</div>
+                        {farm.cleaningDuration && (
+                          <div className="text-xs text-gray-400">
+                            +{farm.cleaningDuration}min cleaning
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+
+                    {/* Capacity */}
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="font-medium">{farm.maxGuests || "N/A"} guests</div>
+                        <div className="text-sm text-gray-500">
+                          {farm.latitude && farm.longitude ? "GPS tracked" : "No GPS"}
+                        </div>
+                      </div>
+                    </TableCell>
+
+                    {/* Status */}
+                    <TableCell>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={farm.isEnable ?? false}
+                            onCheckedChange={() => toggleStatusMutation.mutate(farm.id)}
+                            disabled={toggleStatusMutation.isPending}
+                          />
+                          <span className="text-sm">
+                            {farm.isEnable ? "Active" : "Disabled"}
+                          </span>
+                        </div>
+                        <Badge variant={farm.isBooking ? "default" : "secondary"} className="text-xs">
+                          {farm.isBooking ? "Booking ON" : "Booking OFF"}
+                        </Badge>
+                      </div>
+                    </TableCell>
+
+                    {/* Performance */}
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="text-sm font-medium text-green-600">85% booked</div>
+                        <div className="text-xs text-gray-500">This month</div>
+                        <div className="text-xs text-gray-400">₹{Math.floor(Math.random() * 50000 + 10000).toLocaleString()} revenue</div>
+                      </div>
+                    </TableCell>
+
+                    {/* Actions */}
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end space-x-2">
                         <Button

@@ -21,8 +21,12 @@ import {
   Building,
   Shield,
   UserCheck,
-  Clock
+  Clock,
+  Download,
+  Eye,
+  MessageSquare
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface UserSearchResult {
   firebaseId: string;
@@ -623,41 +627,191 @@ function OwnerDetails({ ownerId }: { ownerId: string }) {
 }
 
 function AllCustomers() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  
   const { data: customers = [] } = useQuery({
     queryKey: ['/api/user-management/customers'],
     queryFn: () => fetch('/api/user-management/customers').then(res => res.json())
   });
 
+  const filteredCustomers = customers.filter((customer: any) => {
+    const matchesSearch = customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         customer.phoneNumber?.includes(searchTerm);
+    const matchesFilter = filterStatus === "all" || customer.accountStatus === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {customers.map((customer: any) => (
-          <Card key={customer.firebaseId}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Users className="h-4 w-4 text-blue-500" />
-                <h3 className="font-semibold">{customer.name}</h3>
+    <div className="space-y-6">
+      {/* Enhanced Search and Filter Controls */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search customers by name, email, or phone..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Customers</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="premium">Premium</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button variant="outline" size="sm">
+          <Download className="h-4 w-4 mr-2" />
+          Export ({filteredCustomers.length})
+        </Button>
+      </div>
+
+      {/* Customer Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Users className="h-8 w-8 text-blue-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Customers</p>
+                <p className="text-2xl font-bold">{customers.length}</p>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <TrendingUp className="h-8 w-8 text-green-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Premium Members</p>
+                <p className="text-2xl font-bold">{customers.filter((c: any) => c.membershipLevel === 'Premium').length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <DollarSign className="h-8 w-8 text-purple-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                <p className="text-2xl font-bold">₹{customers.reduce((sum: number, c: any) => sum + (c.totalSpent || 0), 0).toLocaleString()}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Activity className="h-8 w-8 text-orange-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Active This Month</p>
+                <p className="text-2xl font-bold">{customers.filter((c: any) => c.accountStatus === 'active').length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Enhanced Customer Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredCustomers.map((customer: any) => (
+          <Card key={customer.firebaseId} className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{customer.name}</h3>
+                    <p className="text-xs text-gray-500">ID: {customer.firebaseId?.substring(0, 8)}...</p>
+                  </div>
+                </div>
+                <Badge variant={customer.accountStatus === 'active' ? 'default' : 'secondary'}>
+                  {customer.accountStatus || 'active'}
+                </Badge>
+              </div>
+              
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Total Bookings:</span>
-                  <span className="font-medium">{customer.totalBookings}</span>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-3 w-3 text-gray-400" />
+                  <span className="truncate">{customer.email}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Total Spent:</span>
-                  <span className="font-medium">₹{customer.totalSpent?.toLocaleString()}</span>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-3 w-3 text-gray-400" />
+                  <span>{customer.phoneNumber}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Membership:</span>
-                  <Badge variant="outline" className="text-xs">
-                    {customer.membershipLevel}
-                  </Badge>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-3 w-3 text-gray-400" />
+                  <span>{customer.address?.city || customer.personalInfo?.address?.city || 'Not specified'}</span>
+                </div>
+                
+                <div className="pt-2 border-t space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Bookings:</span>
+                    <span className="font-medium">{customer.totalBookings || customer.bookingHistory?.totalBookings || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Spent:</span>
+                    <span className="font-medium text-green-600">₹{(customer.totalSpent || customer.paymentHistory?.totalSpent || 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Loyalty Points:</span>
+                    <span className="font-medium text-orange-600">{customer.loyaltyPoints || customer.loyaltyProgram?.currentPoints || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Membership:</span>
+                    <Badge variant={customer.membershipLevel === 'Premium' ? 'default' : 'outline'} className="text-xs">
+                      {customer.membershipLevel || 'Basic'}
+                    </Badge>
+                  </div>
+                  {(customer.lastBookingDate || customer.bookingHistory?.lastBookingDate) && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Last Booking:</span>
+                      <span className="text-xs">{new Date(customer.lastBookingDate || customer.bookingHistory?.lastBookingDate).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                  {customer.preferences?.favoriteActivities && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Interests:</span>
+                      <span className="text-xs">{customer.preferences.favoriteActivities.slice(0, 2).join(', ')}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-2 flex gap-1">
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Eye className="h-3 w-3 mr-1" />
+                    View
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <MessageSquare className="h-3 w-3 mr-1" />
+                    Contact
+                  </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+      
+      {filteredCustomers.length === 0 && (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-600">No customers found matching your search criteria.</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

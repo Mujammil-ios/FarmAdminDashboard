@@ -4,8 +4,10 @@ import { storage } from "./storage";
 import { userManagementService } from "./user-management";
 import { FarmPerformanceDataService } from "./farm-performance-data";
 import { rewardsService } from "./rewards-service";
+import { couponService } from "./coupon-service";
 import { insertAdminSchema, insertUserSchema, insertFarmSchema, insertBookingSchema, insertTransactionSchema, insertRequestedFarmSchema, insertCategorySchema, insertAmenitySchema, insertCitySchema, insertAreaSchema, insertFaqSchema, insertSubPropertySchema, insertBannerSchema, insertFeaturedSectionSchema, insertReelSchema } from "@shared/schema";
 import { insertWallet, insertWalletTransaction, insertRewardsCampaign, insertRewardsConfig, insertApiDoc } from "@shared/rewards-schema";
+import { insertCoupon, insertRefund } from "@shared/coupon-schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard metrics
@@ -1283,6 +1285,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching API doc:", error);
       res.status(500).json({ message: "Failed to fetch API doc" });
+    }
+  });
+
+  // Coupon Management Routes
+  app.get("/api/coupons", async (req, res) => {
+    try {
+      const { isActive } = req.query;
+      const coupons = await couponService.getAllCoupons(
+        isActive ? isActive === "true" : undefined
+      );
+      res.json(coupons);
+    } catch (error) {
+      console.error("Error fetching coupons:", error);
+      res.status(500).json({ message: "Failed to fetch coupons" });
+    }
+  });
+
+  app.get("/api/coupons/:id", async (req, res) => {
+    try {
+      const coupon = await couponService.getCoupon(parseInt(req.params.id));
+      if (!coupon) {
+        return res.status(404).json({ message: "Coupon not found" });
+      }
+      res.json(coupon);
+    } catch (error) {
+      console.error("Error fetching coupon:", error);
+      res.status(500).json({ message: "Failed to fetch coupon" });
+    }
+  });
+
+  app.post("/api/coupons", async (req, res) => {
+    try {
+      const couponData = insertCoupon.parse(req.body);
+      const coupon = await couponService.createCoupon(couponData);
+      res.status(201).json(coupon);
+    } catch (error) {
+      console.error("Error creating coupon:", error);
+      res.status(400).json({ message: "Failed to create coupon" });
+    }
+  });
+
+  app.put("/api/coupons/:id", async (req, res) => {
+    try {
+      const couponData = insertCoupon.partial().parse(req.body);
+      const coupon = await couponService.updateCoupon(parseInt(req.params.id), couponData);
+      res.json(coupon);
+    } catch (error) {
+      console.error("Error updating coupon:", error);
+      res.status(400).json({ message: "Failed to update coupon" });
+    }
+  });
+
+  app.post("/api/coupons/:id/toggle", async (req, res) => {
+    try {
+      const coupon = await couponService.toggleCouponStatus(parseInt(req.params.id));
+      res.json(coupon);
+    } catch (error) {
+      console.error("Error toggling coupon status:", error);
+      res.status(400).json({ message: "Failed to toggle coupon status" });
+    }
+  });
+
+  app.post("/api/coupons/bulk", async (req, res) => {
+    try {
+      const { template, count, prefix } = req.body;
+      const operation = await couponService.createBulkCoupons(template, count, prefix);
+      res.json(operation);
+    } catch (error) {
+      console.error("Error creating bulk coupons:", error);
+      res.status(400).json({ message: "Failed to create bulk coupons" });
+    }
+  });
+
+  app.post("/api/coupons/calculate", async (req, res) => {
+    try {
+      const { bookingAmount, couponCode, userId, farmId, categoryId } = req.body;
+      const calculation = await couponService.calculateBookingTotal(
+        bookingAmount,
+        couponCode,
+        userId,
+        farmId,
+        categoryId
+      );
+      res.json(calculation);
+    } catch (error) {
+      console.error("Error calculating booking total:", error);
+      res.status(400).json({ message: "Failed to calculate booking total" });
+    }
+  });
+
+  app.get("/api/coupons/analytics", async (req, res) => {
+    try {
+      const analytics = await couponService.getCouponAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching coupon analytics:", error);
+      res.status(500).json({ message: "Failed to fetch coupon analytics" });
+    }
+  });
+
+  // Refund Management Routes
+  app.get("/api/refunds", async (req, res) => {
+    try {
+      const { status } = req.query;
+      const refunds = await couponService.getAllRefunds(status as string);
+      res.json(refunds);
+    } catch (error) {
+      console.error("Error fetching refunds:", error);
+      res.status(500).json({ message: "Failed to fetch refunds" });
+    }
+  });
+
+  app.get("/api/refunds/:id", async (req, res) => {
+    try {
+      const refund = await couponService.getRefund(parseInt(req.params.id));
+      if (!refund) {
+        return res.status(404).json({ message: "Refund not found" });
+      }
+      res.json(refund);
+    } catch (error) {
+      console.error("Error fetching refund:", error);
+      res.status(500).json({ message: "Failed to fetch refund" });
+    }
+  });
+
+  app.post("/api/refunds", async (req, res) => {
+    try {
+      const refundData = insertRefund.parse(req.body);
+      const refund = await couponService.createRefund(refundData);
+      res.status(201).json(refund);
+    } catch (error) {
+      console.error("Error creating refund:", error);
+      res.status(400).json({ message: "Failed to create refund" });
+    }
+  });
+
+  app.put("/api/refunds/:id/process", async (req, res) => {
+    try {
+      const { status, notes } = req.body;
+      const adminId = 1; // TODO: Get from authenticated user
+      const refund = await couponService.updateRefundStatus(
+        parseInt(req.params.id),
+        status,
+        adminId,
+        notes
+      );
+      res.json(refund);
+    } catch (error) {
+      console.error("Error processing refund:", error);
+      res.status(400).json({ message: "Failed to process refund" });
     }
   });
 

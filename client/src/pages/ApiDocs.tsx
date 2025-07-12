@@ -98,6 +98,7 @@ export default function ApiDocs() {
 
   const renderMarkdown = (content: string) => {
     // Simple markdown rendering for preview
+    if (!content) return '';
     return content
       .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mb-4">$1</h1>')
       .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-semibold mb-3">$1</h2>')

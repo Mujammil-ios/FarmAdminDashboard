@@ -176,33 +176,17 @@ export default function RewardsDashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {filteredWallets.map((wallet) => (
-                  <div key={wallet.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                        <Users className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{wallet.user.name}</p>
-                          <Badge variant={wallet.userType === "customer" ? "default" : "secondary"}>
-                            {wallet.userType}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{wallet.user.email}</p>
-                      </div>
+                  <div key={wallet.id} className="flex items-center justify-between p-3 border rounded">
+                    <div className="flex items-center gap-3">
+                      <Badge variant={wallet.userType === "customer" ? "default" : "secondary"}>
+                        {wallet.userType}
+                      </Badge>
+                      <span className="font-medium">{wallet.user.name}</span>
+                      <span className="text-sm text-muted-foreground">₹{wallet.balance}</span>
                     </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold">₹{wallet.balance}</div>
-                      <div className="text-sm text-muted-foreground">
-                        Earned: ₹{wallet.totalEarned} | Spent: ₹{wallet.totalSpent}
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">View Details</Button>
-                      <Button size="sm">Adjust Balance</Button>
-                    </div>
+                    <Button variant="outline" size="sm">Adjust</Button>
                   </div>
                 ))}
               </div>

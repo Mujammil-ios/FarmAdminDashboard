@@ -32,6 +32,7 @@ import {
   Wallet,
   FileText,
   Shield,
+  Ticket,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -97,6 +98,7 @@ const navigationGroups: NavigationGroup[] = [
     items: [
       { name: "Slot Bookings", href: "/bookings", icon: CalendarCheck },
       { name: "Transactions", href: "/transactions", icon: CreditCard },
+      { name: "Coupon Management", href: "/coupons", icon: Ticket },
     ],
   },
   {

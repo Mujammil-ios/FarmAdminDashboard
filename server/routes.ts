@@ -5,6 +5,7 @@ import { userManagementService } from "./user-management";
 import { FarmPerformanceDataService } from "./farm-performance-data";
 import { rewardsService } from "./rewards-service";
 import { couponService } from "./coupon-service";
+import { instagramService } from "./instagram-service";
 import { insertAdminSchema, insertUserSchema, insertFarmSchema, insertBookingSchema, insertTransactionSchema, insertRequestedFarmSchema, insertCategorySchema, insertAmenitySchema, insertCitySchema, insertAreaSchema, insertFaqSchema, insertSubPropertySchema, insertBannerSchema, insertFeaturedSectionSchema, insertReelSchema } from "@shared/schema";
 import { insertWallet, insertWalletTransaction, insertRewardsCampaign, insertRewardsConfig, insertApiDoc } from "@shared/rewards-schema";
 import { insertCoupon, insertRefund } from "@shared/coupon-schema";
@@ -791,6 +792,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating reel:", error);
       res.status(400).json({ message: "Failed to create reel" });
+    }
+  });
+
+  // Instagram reel import endpoint
+  app.post("/api/reels/import-instagram", async (req, res) => {
+    try {
+      const { instagramUrl } = req.body;
+      
+      if (!instagramUrl) {
+        return res.status(400).json({ message: "Instagram URL is required" });
+      }
+
+      if (!instagramService.isValidInstagramUrl(instagramUrl)) {
+        return res.status(400).json({ message: "Invalid Instagram URL format" });
+      }
+
+      // Get available farms for farm matching
+      const farms = await storage.getAllFarms();
+      
+      // Fetch Instagram reel data
+      const reelData = await instagramService.fetchReelData(instagramUrl, farms);
+      
+      res.json(reelData);
+    } catch (error) {
+      console.error("Error importing Instagram reel:", error);
+      res.status(500).json({ message: error.message || "Failed to import Instagram reel" });
     }
   });
 

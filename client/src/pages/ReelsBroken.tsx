@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Video, Play, Eye, Share, ArrowUp, ArrowDown, Instagram, Download } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Edit, Trash2, Video, Play, Eye, Share, ArrowUp, ArrowDown, Instagram, Download, Link } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -76,6 +77,35 @@ export default function Reels() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reels"] });
       toast({ title: "Reel deleted successfully" });
+    },
+  });
+
+  const reorderMutation = useMutation({
+    mutationFn: async ({ id, direction }: { id: number; direction: "up" | "down" }) => {
+      const response = await apiRequest(`/api/reels/${id}/reorder`, {
+        method: "POST",
+        body: JSON.stringify({ direction }),
+      });
+      if (!response.ok) throw new Error("Failed to reorder reel");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reels"] });
+      toast({ title: "Reel order updated" });
+    },
+  });
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest(`/api/reels/${id}/toggle`, {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to toggle status");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reels"] });
+      toast({ title: "Status updated successfully" });
     },
   });
 
@@ -278,146 +308,145 @@ export default function Reels() {
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingReel ? "Edit Reel" : "Add New Reel"}
-                </DialogTitle>
-              </DialogHeader>
+            <DialogHeader>
+              <DialogTitle>
+                {editingReel ? "Edit Reel" : "Add New Reel"}
+              </DialogTitle>
+            </DialogHeader>
 
-              <form onSubmit={onSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="farmId">Select Farm</Label>
-                    <Select 
-                      value={formData.farmId?.toString()} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, farmId: Number(value) }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose a farm" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {farms.map((farm: Farm) => (
-                          <SelectItem key={farm.id} value={farm.id.toString()}>
-                            {farm.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="farmAliasName">Farm Alias Name</Label>
-                    <Input
-                      id="farmAliasName"
-                      value={formData.farmAliasName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAliasName: e.target.value }))}
-                      placeholder="e.g., @greenvalleyfarms"
-                      required
-                    />
-                  </div>
-                </div>
-
+            <form onSubmit={onSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="title">Reel Title</Label>
+                  <Label htmlFor="farmId">Select Farm</Label>
+                  <Select 
+                    value={formData.farmId?.toString()} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, farmId: Number(value) }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a farm" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {farms.map((farm: Farm) => (
+                        <SelectItem key={farm.id} value={farm.id.toString()}>
+                          {farm.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="farmAliasName">Farm Alias Name</Label>
                   <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="e.g., Morning Views at Green Valley"
+                    id="farmAliasName"
+                    value={formData.farmAliasName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, farmAliasName: e.target.value }))}
+                    placeholder="e.g., @greenvalleyfarms"
                     required
                   />
                 </div>
+              </div>
 
+              <div>
+                <Label htmlFor="title">Reel Title</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="e.g., Morning Views at Green Valley"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description/Caption</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Write a captivating description for your reel..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="description">Description/Caption</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Write a captivating description for your reel..."
-                    rows={3}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="videoUrl">Video URL</Label>
-                    <Input
-                      id="videoUrl"
-                      value={formData.videoUrl}
-                      onChange={(e) => setFormData(prev => ({ ...prev, videoUrl: e.target.value }))}
-                      placeholder="https://example.com/video.mp4"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="thumbnailUrl">Thumbnail URL</Label>
-                    <Input
-                      id="thumbnailUrl"
-                      value={formData.thumbnailUrl}
-                      onChange={(e) => setFormData(prev => ({ ...prev, thumbnailUrl: e.target.value }))}
-                      placeholder="https://example.com/thumbnail.jpg"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="duration">Duration (seconds)</Label>
-                    <Input
-                      id="duration"
-                      type="number"
-                      min="1"
-                      max="300"
-                      value={formData.duration}
-                      onChange={(e) => setFormData(prev => ({ ...prev, duration: Number(e.target.value) }))}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="displayOrder">Display Order</Label>
-                    <Input
-                      id="displayOrder"
-                      type="number"
-                      min="1"
-                      value={formData.displayOrder}
-                      onChange={(e) => setFormData(prev => ({ ...prev, displayOrder: Number(e.target.value) }))}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="tags">Tags (comma separated)</Label>
+                  <Label htmlFor="videoUrl">Video URL</Label>
                   <Input
-                    id="tags"
-                    value={Array.isArray(formData.tags) ? formData.tags.join(', ') : ''}
-                    onChange={(e) => handleTagsChange(e.target.value)}
-                    placeholder="e.g., organic, peaceful, nature, luxury"
+                    id="videoUrl"
+                    value={formData.videoUrl}
+                    onChange={(e) => setFormData(prev => ({ ...prev, videoUrl: e.target.value }))}
+                    placeholder="https://example.com/video.mp4"
+                    required
                   />
-                  <p className="text-sm text-gray-500 mt-1">Separate tags with commas</p>
                 </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isActive"
-                    checked={formData.isActive}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
+                <div>
+                  <Label htmlFor="thumbnailUrl">Thumbnail URL</Label>
+                  <Input
+                    id="thumbnailUrl"
+                    value={formData.thumbnailUrl}
+                    onChange={(e) => setFormData(prev => ({ ...prev, thumbnailUrl: e.target.value }))}
+                    placeholder="https://example.com/thumbnail.jpg"
                   />
-                  <Label htmlFor="isActive">Active</Label>
                 </div>
+              </div>
 
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                    {editingReel ? "Update" : "Create"}
-                  </Button>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="duration">Duration (seconds)</Label>
+                  <Input
+                    id="duration"
+                    type="number"
+                    min="1"
+                    max="300"
+                    value={formData.duration}
+                    onChange={(e) => setFormData(prev => ({ ...prev, duration: Number(e.target.value) }))}
+                    required
+                  />
                 </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+                <div>
+                  <Label htmlFor="displayOrder">Display Order</Label>
+                  <Input
+                    id="displayOrder"
+                    type="number"
+                    min="1"
+                    value={formData.displayOrder}
+                    onChange={(e) => setFormData(prev => ({ ...prev, displayOrder: Number(e.target.value) }))}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="tags">Tags (comma separated)</Label>
+                <Input
+                  id="tags"
+                  value={Array.isArray(formData.tags) ? formData.tags.join(', ') : ''}
+                  onChange={(e) => handleTagsChange(e.target.value)}
+                  placeholder="e.g., organic, peaceful, nature, luxury"
+                />
+                <p className="text-sm text-gray-500 mt-1">Separate tags with commas</p>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
+                />
+                <Label htmlFor="isActive">Active</Label>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                  {editingReel ? "Update" : "Create"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid gap-4">
@@ -447,6 +476,9 @@ export default function Reels() {
                               src={reel.thumbnailUrl} 
                               alt={reel.title}
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
                             />
                             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
                               <Play className="h-6 w-6 text-white" />
@@ -459,6 +491,9 @@ export default function Reels() {
                             <h3 className="text-lg font-semibold truncate">{reel.title}</h3>
                             <Badge variant={reel.isActive ? "default" : "destructive"}>
                               {reel.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                            <Badge variant="outline">
+                              Order: {reel.displayOrder}
                             </Badge>
                           </div>
                           
@@ -499,6 +534,30 @@ export default function Reels() {
                       </div>
                       
                       <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => reorderMutation.mutate({ id: reel.id, direction: "up" })}
+                          disabled={reorderMutation.isPending}
+                        >
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => reorderMutation.mutate({ id: reel.id, direction: "down" })}
+                          disabled={reorderMutation.isPending}
+                        >
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleStatusMutation.mutate(reel.id)}
+                          disabled={toggleStatusMutation.isPending}
+                        >
+                          {reel.isActive ? "Deactivate" : "Activate"}
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"

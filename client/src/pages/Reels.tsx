@@ -222,7 +222,7 @@ export default function Reels() {
               <DialogHeader>
                 <DialogTitle>Import Instagram Reel</DialogTitle>
                 <DialogDescription>
-                  Paste an Instagram reel URL to automatically fetch data
+                  Paste an Instagram reel URL to automatically fetch data using web scraping. Works with public Instagram reels.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
@@ -234,6 +234,9 @@ export default function Reels() {
                     onChange={(e) => setInstagramUrl(e.target.value)}
                     placeholder="https://www.instagram.com/reel/DLjO6ybS5KB/"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Supports public Instagram reels. Uses web scraping with Puppeteer fallback for dynamic content.
+                  </p>
                 </div>
                 <Button 
                   onClick={handleImportInstagram} 

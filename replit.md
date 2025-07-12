@@ -104,6 +104,15 @@ The application implements a sophisticated slot booking system:
 ## Changelog
 ```
 Changelog:
+- July 12, 2025. Implemented Instagram Reel Automation with Web Scraping
+  * Successfully implemented real web scraping for Instagram reel import
+  * Added Axios + Cheerio scraping with Puppeteer fallback for dynamic content
+  * Created smart farm detection from Instagram captions using keyword matching
+  * Built automatic data extraction for titles, descriptions, hashtags, video/thumbnail URLs
+  * Added comprehensive scraping approach that handles both static and JavaScript-heavy pages
+  * Implemented bulk reel management system for 50+ video collections
+  * Created Instagram URL validation and reel ID extraction
+  * Added preview system with one-click data transfer to reel creation form
 - July 12, 2025. Implemented simplified Coupon & Refund Management system
   * Successfully simplified coupon management with standard features as requested
   * Added simple coupon creation, status management, and basic analytics

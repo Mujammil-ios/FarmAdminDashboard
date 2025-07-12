@@ -25,6 +25,9 @@ import CustomerManagement from "./pages/CustomerManagement";
 import OwnerManagement from "./pages/OwnerManagement";
 import PaymentManagement from "./pages/PaymentManagement";
 import FarmPerformance from "./pages/FarmPerformance";
+import RewardsDashboard from "./pages/rewards/RewardsDashboard";
+import ApiDocs from "./pages/ApiDocs";
+import AuditTrail from "./pages/AuditTrail";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -53,6 +56,11 @@ function Router() {
         <Route path="/owner-management" component={OwnerManagement} />
         <Route path="/payment-management" component={PaymentManagement} />
         <Route path="/farm-performance" component={FarmPerformance} />
+        <Route path="/rewards" component={RewardsDashboard} />
+        <Route path="/rewards/campaigns" component={RewardsDashboard} />
+        <Route path="/rewards/config" component={RewardsDashboard} />
+        <Route path="/api-docs" component={ApiDocs} />
+        <Route path="/audit-trail" component={AuditTrail} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

@@ -3,7 +3,9 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { userManagementService } from "./user-management";
 import { FarmPerformanceDataService } from "./farm-performance-data";
+import { rewardsService } from "./rewards-service";
 import { insertAdminSchema, insertUserSchema, insertFarmSchema, insertBookingSchema, insertTransactionSchema, insertRequestedFarmSchema, insertCategorySchema, insertAmenitySchema, insertCitySchema, insertAreaSchema, insertFaqSchema, insertSubPropertySchema, insertBannerSchema, insertFeaturedSectionSchema, insertReelSchema } from "@shared/schema";
+import { insertWallet, insertWalletTransaction, insertRewardsCampaign, insertRewardsConfig, insertApiDoc } from "@shared/rewards-schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard metrics
@@ -1211,6 +1213,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching farm payouts:", error);
       res.status(500).json({ message: "Failed to fetch farm payouts" });
+    }
+  });
+
+  // Rewards & Wallet Routes
+  app.get("/api/rewards/metrics", async (req, res) => {
+    try {
+      const metrics = await rewardsService.getDashboardMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error fetching rewards metrics:", error);
+      res.status(500).json({ message: "Failed to fetch rewards metrics" });
+    }
+  });
+
+  app.get("/api/rewards/wallets", async (req, res) => {
+    try {
+      const { limit = "50", offset = "0", userType } = req.query;
+      const result = await rewardsService.getAllWallets(
+        parseInt(limit as string), 
+        parseInt(offset as string),
+        userType as string
+      );
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching wallets:", error);
+      res.status(500).json({ message: "Failed to fetch wallets" });
+    }
+  });
+
+  app.get("/api/rewards/campaigns", async (req, res) => {
+    try {
+      const campaigns = await rewardsService.getAllCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch campaigns" });
+    }
+  });
+
+  app.get("/api/rewards/config", async (req, res) => {
+    try {
+      const config = await rewardsService.getAllConfig();
+      res.json(config);
+    } catch (error) {
+      console.error("Error fetching rewards config:", error);
+      res.status(500).json({ message: "Failed to fetch rewards config" });
+    }
+  });
+
+  // API Documentation Routes
+  app.get("/api/docs", async (req, res) => {
+    try {
+      const docs = await rewardsService.getAllApiDocs();
+      res.json(docs);
+    } catch (error) {
+      console.error("Error fetching API docs:", error);
+      res.status(500).json({ message: "Failed to fetch API docs" });
+    }
+  });
+
+  app.get("/api/docs/:id", async (req, res) => {
+    try {
+      const doc = await rewardsService.getApiDoc(parseInt(req.params.id));
+      if (!doc) {
+        return res.status(404).json({ message: "API doc not found" });
+      }
+      res.json(doc);
+    } catch (error) {
+      console.error("Error fetching API doc:", error);
+      res.status(500).json({ message: "Failed to fetch API doc" });
+    }
+  });
+
+  // Audit Trail Routes
+  app.get("/api/audit-logs", async (req, res) => {
+    try {
+      // Mock audit logs for demonstration
+      const mockLogs = [
+        {
+          id: 1,
+          adminId: 1,
+          adminName: "John Admin",
+          action: "update",
+          module: "rewards",
+          entityType: "campaign",
+          entityId: 1,
+          oldData: { status: "draft" },
+          newData: { status: "active" },
+          ipAddress: "192.168.1.100",
+          userAgent: "Mozilla/5.0...",
+          createdAt: new Date("2024-01-15T10:30:00Z"),
+          description: "Activated Summer Booking Bonus campaign"
+        }
+      ];
+      res.json(mockLogs);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      res.status(500).json({ message: "Failed to fetch audit logs" });
     }
   });
 

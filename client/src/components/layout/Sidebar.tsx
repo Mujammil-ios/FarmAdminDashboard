@@ -29,6 +29,9 @@ import {
   Settings,
   Crown,
   TrendingUp,
+  Wallet,
+  FileText,
+  Shield,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -56,6 +59,15 @@ const navigationGroups: NavigationGroup[] = [
       { name: "Dashboard", href: "/dashboard", icon: ChartLine },
       { name: "Farm Performance", href: "/farm-performance", icon: TrendingUp },
       { name: "Availability Checker", href: "/availability-checker", icon: Search },
+    ],
+  },
+  {
+    name: "Rewards & Wallet",
+    icon: Wallet,
+    items: [
+      { name: "Rewards Dashboard", href: "/rewards", icon: Wallet },
+      { name: "Campaigns", href: "/rewards/campaigns", icon: Crown },
+      { name: "Configuration", href: "/rewards/config", icon: Settings },
     ],
   },
   {
@@ -106,17 +118,27 @@ const navigationGroups: NavigationGroup[] = [
       { name: "FAQs", href: "/faqs", icon: HelpCircle },
     ],
   },
+  {
+    name: "Documentation",
+    icon: FileText,
+    items: [
+      { name: "API Documentation", href: "/api-docs", icon: FileText },
+      { name: "Audit Trail", href: "/audit-trail", icon: Shield },
+    ],
+  },
 ];
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [location] = useLocation();
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     Analytics: true,
+    "Rewards & Wallet": false,
     "User Management": false,
     "Farm Operations": false,
     "Bookings & Payments": false,
     "Content Management": false,
     Settings: false,
+    Documentation: false,
   });
 
   const isActiveRoute = (href: string) => {

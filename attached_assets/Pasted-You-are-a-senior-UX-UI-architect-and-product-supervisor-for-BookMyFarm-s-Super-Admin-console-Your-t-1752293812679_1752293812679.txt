@@ -1,0 +1,71 @@
+You are a senior UX/UI architect and product supervisor for BookMyFarm’s Super‑Admin console. Your task is to design a unified Admin interface that lets Super‑Admins configure, monitor and manage **every** “Rewards & Wallet” feature, as well as all other modules and their API specs via an integrated “API README” workspace.
+
+**Scope**  
+- Only the Super‑Admin console (no Customer/Owner public UI).  
+- Must include a built‑in API README editor/viewer for technical documentation.  
+- Covers all planned modules: Rewards & Wallet, Booking Management, Partner Onboarding, Commission Settings, Cancellation Policies, Campaigns, Audit Trails, and more.
+
+**1. Global Navigation & Layout**  
+- **Left Sidebar** with collapsible sections:  
+  - Dashboard (Overview)  
+  - Rewards & Wallet  
+  - Bookings  
+  - Partners  
+  - Commissions  
+  - Campaigns  
+  - Settings  
+  - API README  
+  - Audit Trail  
+- **Top Bar**: Quick‑action buttons (Create Campaign, Adjust Wallet, Add Partner), a global search, and user profile menu.
+
+**2. Dashboard (Overview)**  
+- KPI cards: Total bookings, Active partners, Points issued, Commission revenue, Open refunds.  
+- Graph widgets: bookings vs. cancellations, points issued vs. redeemed, partner growth.  
+- “Recent Activity” feed of key admin actions.
+
+**3. Module Screen Templates**  
+For each sidebar section, define:  
+- **List View**: Table or card list (e.g. list of campaigns with status toggles).  
+- **Detail/Edit View**: Form or card to create/edit records (e.g. campaign rules, commission rates).  
+- **Batch Actions**: Bulk enable/disable, export CSV, mass adjustments.
+
+**4. Rewards & Wallet Section**  
+- **Configuration Tab**: Welcome points, refund rules, conversion rates.  
+- **User Search & Impersonation**: Search bar → select Customer or Owner wallet → view/edit balance & transactions.  
+- **Campaigns Sub‑tab**: List of active/inactive reward campaigns.
+
+**5. API README Workspace**  
+- **File Browser Pane**: Tree view of markdown files (e.g. `rewards.md`, `bookings.md`).  
+- **Editor Pane**: Rich‑text editor with syntax highlighting for code blocks.  
+- **Preview Pane**: Live HTML preview of the markdown.  
+- **Versioning Controls**: Commit changes, view history, rollback.
+
+**6. Audit Trail**  
+- Chronological log with filters (module, user, date, action type).  
+- Inline “Revert” or “Review” actions for critical changes.
+
+**7. Component Library & Styles**  
+- **Cards**: 2xl rounded, subtle shadow.  
+- **Tables**: Fixed header, sortable columns, pagination.  
+- **Forms**: Labels (lg), inputs (base), dropdowns, toggles.  
+- **Modals & Drawers**: Confirmation modals for irreversible actions.  
+- **Charts**: Line, bar, pie with legends.  
+- **Notifications**: Toasts at top‑right.
+
+**8. Responsive Behavior**  
+- Desktop focus, with collapse‑to‑drawer behavior for smaller widths.
+
+**Deliverables**  
+- A full sitemap of the Super‑Admin console.  
+- Annotated wireframes/mockups for:  
+  1. Dashboard  
+  2. Rewards & Wallet config & user‑impersonation  
+  3. Booking Management screens  
+  4. Partner/Commission settings  
+  5. Campaigns list & editor  
+  6. API README workspace  
+  7. Audit Trail viewer  
+- A component library spec (colors, typography, UI elements).  
+- A high‑level UX flow diagram showing how an admin moves between modules and updates both UI config and API docs.
+
+Produce a Figma‑style spec so that both UI developers and technical writers can implement the console and maintain API documentation seamlessly.  

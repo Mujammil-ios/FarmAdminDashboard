@@ -1302,6 +1302,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/coupons/analytics", async (req, res) => {
+    try {
+      const analytics = await couponService.getCouponAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching coupon analytics:", error);
+      res.status(500).json({ message: "Failed to fetch coupon analytics" });
+    }
+  });
+
   app.get("/api/coupons/:id", async (req, res) => {
     try {
       const coupon = await couponService.getCoupon(parseInt(req.params.id));
@@ -1372,16 +1382,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error calculating booking total:", error);
       res.status(400).json({ message: "Failed to calculate booking total" });
-    }
-  });
-
-  app.get("/api/coupons/analytics", async (req, res) => {
-    try {
-      const analytics = await couponService.getCouponAnalytics();
-      res.json(analytics);
-    } catch (error) {
-      console.error("Error fetching coupon analytics:", error);
-      res.status(500).json({ message: "Failed to fetch coupon analytics" });
     }
   });
 

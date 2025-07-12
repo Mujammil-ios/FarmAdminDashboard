@@ -234,15 +234,73 @@ export class RewardsService {
         id: 1,
         filename: "rewards-api.md",
         title: "Rewards & Wallet API",
-        content: `# Rewards & Wallet API
+        content: `# BookMyFarm API Documentation
 
 ## Overview
-The Rewards & Wallet API allows you to manage user wallets, process transactions, and handle rewards campaigns.
+Complete API documentation for BookMyFarm Super Admin system covering rewards, coupons, refunds, and wallet management.
 
 ## Authentication
-All API endpoints require admin authentication via bearer token.
+All API endpoints require admin authentication. Include the admin token in the Authorization header:
+\`\`\`
+Authorization: Bearer YOUR_ADMIN_TOKEN
+\`\`\`
 
-## Endpoints
+## Rewards & Wallet API
+
+### Get Wallet Metrics
+\`\`\`
+GET /api/rewards/metrics
+\`\`\`
+Returns overview metrics for all wallets.
+
+**Response:**
+\`\`\`json
+{
+  "totalWallets": 150,
+  "totalBalance": "45230.50",
+  "pointsIssuedToday": "1250.00",
+  "pointsRedeemedToday": "890.00"
+}
+\`\`\`
+
+### Get All Wallets
+\`\`\`
+GET /api/rewards/wallets?limit=50&offset=0&userType=customer
+\`\`\`
+
+## Coupon Management API
+
+### Get All Coupons
+\`\`\`
+GET /api/coupons?isActive=true
+\`\`\`
+
+### Create Coupon
+\`\`\`
+POST /api/coupons
+\`\`\`
+
+### Calculate Booking Total
+\`\`\`
+POST /api/coupons/calculate
+\`\`\`
+
+## Refund Management API
+
+### Get All Refunds
+\`\`\`
+GET /api/refunds?status=pending
+\`\`\`
+
+### Process Refund
+\`\`\`
+PUT /api/refunds/{refundId}/process
+\`\`\`
+
+## Error Responses
+All endpoints return standard HTTP status codes.
+
+For API support, contact: admin@bookmyfarm.com
 
 ### GET /api/rewards/wallets
 Retrieve all user wallets with pagination.

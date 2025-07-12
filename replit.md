@@ -104,6 +104,15 @@ The application implements a sophisticated slot booking system:
 ## Changelog
 ```
 Changelog:
+- July 12, 2025. Implemented simplified Coupon & Refund Management system
+  * Successfully simplified coupon management with standard features as requested
+  * Added simple coupon creation, status management, and basic analytics
+  * Implemented refund processing with approve/reject workflow
+  * Created booking calculator with real-time coupon validation and tax calculation
+  * Simplified wallet display to user-based single-line format
+  * Added comprehensive API documentation covering all endpoints
+  * Fixed analytics API routes and removed complex UI features
+  * Updated system to be simple and functional without "top notch" complexity
 - July 12, 2025. Implemented comprehensive Super Admin console with Rewards & Wallet system
   * Successfully migrated from Replit Agent to standard Replit environment
   * Added comprehensive Rewards & Wallet management system with user wallets, campaigns, and configuration

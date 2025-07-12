@@ -28,7 +28,7 @@ import FarmPerformance from "./pages/FarmPerformance";
 import RewardsDashboard from "./pages/rewards/RewardsDashboard";
 import ApiDocs from "./pages/ApiDocs";
 import AuditTrail from "./pages/AuditTrail";
-import CouponManagement from "./pages/CouponManagement";
+import SimpleCouponManagement from "./pages/SimpleCouponManagement";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -62,7 +62,7 @@ function Router() {
         <Route path="/rewards/config" component={RewardsDashboard} />
         <Route path="/api-docs" component={ApiDocs} />
         <Route path="/audit-trail" component={AuditTrail} />
-        <Route path="/coupons" component={CouponManagement} />
+        <Route path="/coupons" component={SimpleCouponManagement} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
